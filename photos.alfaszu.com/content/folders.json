@@ -207,13 +207,47 @@
         "url": "相册",
         "index": 4
     },
-    "相册\/ALFA": {
-        "url": "相册\/ALFA"
+    "相册\/matsuri": {
+        "url": "相册\/matsuri"
     },
-    "相册\/ALFA\/2011summer": {
-        "url": "相册\/ALFA\/2011summer"
+    "相册\/matsuri\/2011summer": {
+        "url": "相册\/matsuri\/2011summer"
     },
-    "相册\/ALFA\/2011summer\/shadow": {
-        "url": "相册\/ALFA\/2011summer\/shadow"
+    "相册\/matsuri\/2011summer\/shadow": {
+        "url": "相册\/matsuri\/2011summer\/shadow",
+        "hidden": true
+    },
+    "相册\/event": {
+        "url": "相册\/event"
+    },
+    "相册\/matsuri\/art_exhibition": {
+        "url": "相册\/matsuri\/art_exhibition"
+    },
+    "相册\/recruit": {
+        "url": "相册\/recruit"
+    },
+    "相册\/recruit\/2006recruit": {
+        "url": "相册\/recruit\/2006recruit"
+    },
+    "相册\/recruit\/2005recruit": {
+        "url": "相册\/recruit\/2005recruit"
+    },
+    "相册\/event\/2004cos": {
+        "url": "相册\/event\/2004cos"
+    },
+    "相册\/matsuri\/2019summer": {
+        "url": "相册\/matsuri\/2019summer"
+    },
+    "相册\/matsuri\/2018autumn": {
+        "url": "相册\/matsuri\/2018autumn"
+    },
+    "相册\/matsuri\/2018summer": {
+        "url": "相册\/matsuri\/2018summer"
+    },
+    "相册\/matsuri\/2017autumn": {
+        "url": "相册\/matsuri\/2017autumn"
+    },
+    "相册\/matsuri\/2016autumn": {
+        "url": "相册\/matsuri\/2016autumn"
     }
 }
