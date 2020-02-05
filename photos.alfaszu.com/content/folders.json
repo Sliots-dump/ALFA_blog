@@ -1,11 +1,11 @@
 {
     "index": {
         "url": "index",
-        "index": 8
+        "index": 9
     },
     "examples": {
         "url": "examples",
-        "index": 9
+        "index": 10
     },
     "examples\/assets": {
         "url": "examples\/assets",
@@ -14,7 +14,7 @@
     },
     "contact": {
         "url": "contact",
-        "index": 10
+        "index": 11
     },
     "examples\/gallery": {
         "url": "examples\/gallery",
