@@ -1,11 +1,11 @@
 {
     "index": {
         "url": "index",
-        "index": 3
+        "index": 8
     },
     "examples": {
         "url": "examples",
-        "index": 5
+        "index": 9
     },
     "examples\/assets": {
         "url": "examples\/assets",
@@ -14,7 +14,7 @@
     },
     "contact": {
         "url": "contact",
-        "index": 6
+        "index": 10
     },
     "examples\/gallery": {
         "url": "examples\/gallery",
@@ -203,51 +203,109 @@
     "examples\/plugins\/panorama": {
         "url": "examples\/plugins\/panorama"
     },
-    "相册": {
-        "url": "相册",
-        "index": 4
+    "event": {
+        "url": "event",
+        "index": 3
     },
-    "相册\/matsuri": {
-        "url": "相册\/matsuri"
+    "event\/2004cos": {
+        "url": "event\/2004cos"
     },
-    "相册\/matsuri\/2011summer": {
-        "url": "相册\/matsuri\/2011summer"
+    "CV": {
+        "url": "CV",
+        "index": 5
     },
-    "相册\/matsuri\/2011summer\/shadow": {
-        "url": "相册\/matsuri\/2011summer\/shadow",
+    "CV\/2018CV": {
+        "url": "CV\/2018CV"
+    },
+    "CV\/2016CV": {
+        "url": "CV\/2016CV"
+    },
+    "CV\/2019CV": {
+        "url": "CV\/2019CV"
+    },
+    "matsuri": {
+        "url": "matsuri",
+        "index": 1
+    },
+    "matsuri\/2011summer": {
+        "url": "matsuri\/2011summer",
+        "index": 9
+    },
+    "matsuri\/2011summer\/shadow": {
+        "url": "matsuri\/2011summer\/shadow",
         "hidden": true
     },
-    "相册\/event": {
-        "url": "相册\/event"
+    "matsuri\/art_exhibition": {
+        "url": "matsuri\/art_exhibition",
+        "index": 10
     },
-    "相册\/matsuri\/art_exhibition": {
-        "url": "相册\/matsuri\/art_exhibition"
+    "matsuri\/2019summer": {
+        "url": "matsuri\/2019summer",
+        "index": 1
     },
-    "相册\/recruit": {
-        "url": "相册\/recruit"
+    "matsuri\/2018autumn": {
+        "url": "matsuri\/2018autumn",
+        "index": 2
     },
-    "相册\/recruit\/2006recruit": {
-        "url": "相册\/recruit\/2006recruit"
+    "matsuri\/2018summer": {
+        "url": "matsuri\/2018summer",
+        "index": 3
     },
-    "相册\/recruit\/2005recruit": {
-        "url": "相册\/recruit\/2005recruit"
+    "matsuri\/2017autumn": {
+        "url": "matsuri\/2017autumn",
+        "index": 4
     },
-    "相册\/event\/2004cos": {
-        "url": "相册\/event\/2004cos"
+    "matsuri\/2016autumn": {
+        "url": "matsuri\/2016autumn",
+        "index": 5
     },
-    "相册\/matsuri\/2019summer": {
-        "url": "相册\/matsuri\/2019summer"
+    "matsuri\/2014summer": {
+        "url": "matsuri\/2014summer",
+        "index": 6
     },
-    "相册\/matsuri\/2018autumn": {
-        "url": "相册\/matsuri\/2018autumn"
+    "matsuri\/2011autumn": {
+        "url": "matsuri\/2011autumn",
+        "index": 8
     },
-    "相册\/matsuri\/2018summer": {
-        "url": "相册\/matsuri\/2018summer"
+    "matsuri\/2013autumn": {
+        "url": "matsuri\/2013autumn",
+        "index": 7
     },
-    "相册\/matsuri\/2017autumn": {
-        "url": "相册\/matsuri\/2017autumn"
+    "nichijo": {
+        "url": "nichijo",
+        "index": 2
     },
-    "相册\/matsuri\/2016autumn": {
-        "url": "相册\/matsuri\/2016autumn"
+    "nichijo\/2018-2019": {
+        "url": "nichijo\/2018-2019"
+    },
+    "nichijo\/2016-2017": {
+        "url": "nichijo\/2016-2017"
+    },
+    "nichijo\/2013-2014": {
+        "url": "nichijo\/2013-2014"
+    },
+    "nichijo\/2014-2015": {
+        "url": "nichijo\/2014-2015"
+    },
+    "nichijo\/2017-2018": {
+        "url": "nichijo\/2017-2018"
+    },
+    "paint": {
+        "url": "paint",
+        "index": 6
+    },
+    "recruit": {
+        "url": "recruit",
+        "index": 4
+    },
+    "recruit\/2006recruit": {
+        "url": "recruit\/2006recruit"
+    },
+    "recruit\/2005recruit": {
+        "url": "recruit\/2005recruit"
+    },
+    "RPG": {
+        "url": "RPG",
+        "index": 7
     }
 }

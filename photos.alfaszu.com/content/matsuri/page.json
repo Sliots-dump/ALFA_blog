@@ -1,0 +1,22 @@
+{
+    "title": "ALFA祭",
+    "label": "ALFA祭",
+    "image": "[2017秋祭]人流.gif",
+    "context": {
+        "classes": "separator"
+    },
+    "folders": {
+        "crop": {
+            "enabled": true,
+            "crop": [
+                1,
+                1
+            ]
+        },
+        "classes": "frame,x3-hover-icon-asterisk-primary",
+        "caption": {
+            "enabled": true,
+            "items": "description,amount"
+        }
+    }
+}
