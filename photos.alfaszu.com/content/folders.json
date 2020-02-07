@@ -276,19 +276,24 @@
         "index": 2
     },
     "nichijo\/2018-2019": {
-        "url": "nichijo\/2018-2019"
+        "url": "nichijo\/2018-2019",
+        "index": 1
     },
     "nichijo\/2016-2017": {
-        "url": "nichijo\/2016-2017"
+        "url": "nichijo\/2016-2017",
+        "index": 4
     },
     "nichijo\/2013-2014": {
-        "url": "nichijo\/2013-2014"
+        "url": "nichijo\/2013-2014",
+        "index": 5
     },
     "nichijo\/2014-2015": {
-        "url": "nichijo\/2014-2015"
+        "url": "nichijo\/2014-2015",
+        "index": 2
     },
     "nichijo\/2017-2018": {
-        "url": "nichijo\/2017-2018"
+        "url": "nichijo\/2017-2018",
+        "index": 3
     },
     "paint": {
         "url": "paint",
@@ -299,13 +304,25 @@
         "index": 4
     },
     "recruit\/2006recruit": {
-        "url": "recruit\/2006recruit"
+        "url": "recruit\/2006recruit",
+        "index": 2
     },
     "recruit\/2005recruit": {
-        "url": "recruit\/2005recruit"
+        "url": "recruit\/2005recruit",
+        "index": 3
     },
     "RPG": {
         "url": "RPG",
         "index": 7
+    },
+    "matsuri\/2019autumn": {
+        "url": "matsuri\/2019autumn"
+    },
+    "recruit\/2017recruit": {
+        "url": "recruit\/2017recruit",
+        "index": 1
+    },
+    "nichijo\/2019-2020": {
+        "url": "nichijo\/2019-2020"
     }
 }
