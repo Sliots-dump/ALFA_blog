@@ -215,13 +215,16 @@
         "index": 5
     },
     "CV\/2018CV": {
-        "url": "CV\/2018CV"
+        "url": "CV\/2018CV",
+        "index": 2
     },
     "CV\/2016CV": {
-        "url": "CV\/2016CV"
+        "url": "CV\/2016CV",
+        "index": 3
     },
     "CV\/2019CV": {
-        "url": "CV\/2019CV"
+        "url": "CV\/2019CV",
+        "index": 1
     },
     "matsuri": {
         "url": "matsuri",
@@ -277,7 +280,7 @@
     },
     "nichijo\/2018-2019": {
         "url": "nichijo\/2018-2019",
-        "index": 1
+        "index": 2
     },
     "nichijo\/2016-2017": {
         "url": "nichijo\/2016-2017",
@@ -285,11 +288,11 @@
     },
     "nichijo\/2013-2014": {
         "url": "nichijo\/2013-2014",
-        "index": 5
+        "index": 6
     },
     "nichijo\/2014-2015": {
         "url": "nichijo\/2014-2015",
-        "index": 2
+        "index": 5
     },
     "nichijo\/2017-2018": {
         "url": "nichijo\/2017-2018",
@@ -323,6 +326,10 @@
         "index": 1
     },
     "nichijo\/2019-2020": {
-        "url": "nichijo\/2019-2020"
+        "url": "nichijo\/2019-2020",
+        "index": 1
+    },
+    "recruit\/2019recruit": {
+        "url": "recruit\/2019recruit"
     }
 }

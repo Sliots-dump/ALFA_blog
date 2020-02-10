@@ -1,4 +1,7 @@
 {
     "title": "日常部活",
-    "label": "日常部活"
+    "label": "日常部活",
+    "menu": {
+        "type": "carousel"
+    }
 }
