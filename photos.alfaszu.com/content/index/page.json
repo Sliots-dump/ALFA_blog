@@ -1,7 +1,7 @@
 {
-    "title": "X3 Demo Website",
-    "label": "Home",
-    "description": "Welcome to the X3 photo gallery demo website.",
+    "title": "ALFA相册 - 深圳大学ALFA动漫协会",
+    "label": "ALFA",
+    "description": "欢迎来到 深圳大学ALFA动漫协会 的官方相册",
     "image": "1.yosemite.jpg",
     "context": {
         "classes": "separator"
@@ -15,7 +15,6 @@
             "enabled": true,
             "items": "amount"
         },
-        "assets": "galleries\/",
         "limit": 3
     },
     "gallery": {

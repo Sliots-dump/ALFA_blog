@@ -209,7 +209,7 @@
     },
     "event\/2004cos": {
         "url": "event\/2004cos",
-        "index": 3
+        "index": 4
     },
     "CV": {
         "url": "CV",
@@ -337,10 +337,11 @@
     },
     "event\/ALFA6th": {
         "url": "event\/ALFA6th",
-        "index": 1
+        "index": 2
     },
     "event\/2007dongmen": {
-        "url": "event\/2007dongmen"
+        "url": "event\/2007dongmen",
+        "index": 3
     },
     "works": {
         "url": "works"
@@ -436,5 +437,9 @@
     "recruit\/2009recruit": {
         "url": "recruit\/2009recruit",
         "index": 10
+    },
+    "event\/dump": {
+        "url": "event\/dump",
+        "index": 1
     }
 }
