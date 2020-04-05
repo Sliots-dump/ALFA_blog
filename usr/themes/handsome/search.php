@@ -12,16 +12,19 @@ $this->need('component/header.php');
     <!-- content -->
         <main class="app-content-body <?php Content::returnPageAnimateClass($this); ?>">
             <div class="hbox hbox-auto-xs hbox-auto-sm">
-            <div class="bg-light lter b-b wrapper-md">
-                <h1 class="m-n font-thin h3"><i class="fontello fontello-search i-sm m-r-sm"></i><?php _me("搜索结果") ?></h1>
+            <div class="bg-light lter wrapper-md">
+                <h1 class="entry-title m-n font-thin text-black l-h"><span class="title-icons"><i data-feather="feather"></i></span><?php _me("搜索结果") ?></h1>
                 <div class="entry-meta text-muted  m-b-none small post-head-icon"><?php $this->archiveTitle(array(
                         'search'    =>  _mt('为您查到关于 %s 相关结果'),
                     ), '', ''); ?></div>
             </div>
             <div class="wrapper-md">
-                <div class="tab-container">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href data-toggle="tab" data-target="#tab_1"><?php _me("全部") ?></a></li>
+                <div class="tab-container post_tab">
+                    <ul class="nav no-padder b-b">
+                        <li class="nav-item active"><a  class="nav-link" href data-toggle="tab"
+                                                       data-target="#tab_1"><?php _me
+                                ("全部")
+                                ?></a></li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab_1">
@@ -30,7 +33,8 @@ $this->need('component/header.php');
                                 if ($this->have()): ?>
                                 <?php while ($this->next()): ?>
                                 <li class="list-group-item">
-                                    <a href="<?php $this->permalink(); ?>" class="index-post-title  m-b-sm m-t-sm block"><?php $this->title(); ?></a>
+                                    <a href="<?php $this->permalink(); ?>" class="text-ellipsis h5 block"><?php
+                                        $this->title(); ?></a>
                                     <p class="summary l-h-2x text-muted"><?php echo Content::excerpt($this->content,100); ?></p>
                                 </li>
                                     <?php endwhile; ?>
@@ -40,7 +44,7 @@ $this->need('component/header.php');
                             </ul>
 
                             <!--分页 按钮-->
-                            <nav class="text-center m-t-lg m-b-lg" role="navigation">
+                            <nav class="text-center " role="navigation">
                                 <?php $this->pageNav('<i class="fontello fontello-chevron-left"></i>', '<i class="fontello fontello-chevron-right"></i>'); ?>
                             </nav>
                             <style>

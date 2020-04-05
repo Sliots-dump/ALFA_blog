@@ -12,23 +12,29 @@
   <!--选择侧边栏的颜色-->
   <?php echo Content::selectAsideStyle(); ?>
   <!--<aside>-->
+  <?php
+  $avatarClass = array("","","");
+  if (@!in_array("BigAvatar",$this->options->indexsetup)){
+      $avatarClass = array("vertical-wrapper","vertical-avatar","vertical-flex");
+  }
+  ?>
       <div class="aside-wrap" layout="column">
-        <div class="navi-wrap scroll-y" flex>
+        <div class="navi-wrap scroll-y scroll-hide" flex>
           <!-- user -->
           <div class="clearfix hidden-xs text-center hide  <?php if (!empty($this->options->indexsetup) && !in_array('show-avatar', $this->options->indexsetup)) echo "show"; ?>" id="aside-user">
-            <div class="dropdown wrapper">
+            <div class="dropdown wrapper <?php echo $avatarClass[0]?>">
                 <div ui-nav>
             <?php if($this->options->rewrite == 1): ?>
               <a href="<?php echo Utils::returnDefaultIfEmpty($this->options->clickAvatarLink,$this->options->rootUrl.'/cross.html') ; ?>">
             <?php else: ?>
               <a href="<?php echo Utils::returnDefaultIfEmpty($this->options->clickAvatarLink,$this->options->rootUrl.'/index.php/cross.html') ; ?>">
             <?php endif; ?>
-                <span class="thumb-lg w-auto-folded avatar m-t-sm">
-                  <img src="<?php $this->options->BlogPic() ?>" class="img-full">
+                <span class="thumb-lg w-auto-folded avatar m-t-sm  <?php echo $avatarClass[1]?>">
+                  <img src="<?php $this->options->BlogPic() ?>" class="img-full img-circle normal-shadow">
                 </span>
               </a>
                 </div>
-              <a href="#" data-toggle="dropdown" class="dropdown-toggle hidden-folded">
+              <a href="#" data-toggle="dropdown" class="dropdown-toggle hidden-folded  <?php echo $avatarClass[2]?>">
                 <span class="clear">
                   <span class="block m-t-sm">
                     <strong class="font-bold text-lt"><?php $this->options->BlogName(); ?></strong>
@@ -62,7 +68,6 @@
               </ul>
               <!-- / dropdown -->
             </div>
-              <div class="line dk hidden-folded"></div>
           </div>
           <!-- / user -->
 
@@ -70,13 +75,14 @@
           <nav ui-nav class="navi clearfix">
             <ul class="nav">
              <!--index-->
-              <li class="hidden-folded padder m-t m-b-sm text-muted text-xs">
+                <div class="line dk hidden-folded"></div>
+                <li class="hidden-folded padder m-t m-b-sm text-muted text-xs">
                 <span><?php _me("导航") ?></span>
               </li>
               <?php
               $hideHomeItem = false;
               if(!empty(Typecho_Widget::widget('Widget_Options')->asideItems)){
-                  $json = '['.Typecho_Widget::widget('Widget_Options')->asideItems.']';
+                  $json = '['.Utils::remove_last_comma(Typecho_Widget::widget('Widget_Options')->asideItems).']';
                   $asideItems = json_decode($json);
                   $asideItemsOutput = "";
                   foreach ($asideItems as $asideItem){
@@ -84,6 +90,8 @@
                       @$itemStatus = $asideItem->status;
                       @$itemLink = $asideItem->link;
                       @$itemClass = $asideItem->class;
+                      @$itemFeather = $asideItem->feather;
+
                       @$itemTarget = $asideItem->target;
                       if ($itemName === 'home' && strtoupper($itemStatus) === 'HIDE'){
                           $hideHomeItem = true;
@@ -94,7 +102,12 @@
                       }else{
                           $linkStatus = 'target="_blank"';
                       }
-                      $asideItemsOutput .= '<li> <a '.$linkStatus.' href="'.$itemLink.'" class ="auto"><i class="'.$itemClass.' icon text-md"></i><span>'._mt($itemName).'</span></a></li>';
+                      if (trim($itemFeather)!==""){
+                          $asideItemsOutput .= '<li> <a '.$linkStatus.' href="'.$itemLink.'" 
+class ="auto"><span class="nav-icon"><i data-feather="'.$itemFeather.'"></i></span><span>'._mt($itemName).'</span></a></li>';
+                      }else if (trim($itemClass)!==""){
+                          $asideItemsOutput .= '<li> <a '.$linkStatus.' href="'.$itemLink.'" class ="auto"><span class="nav-icon"><i class="'.$itemClass.'"></i></span><span>'._mt($itemName).'</span></a></li>';
+                      }
                   }
               }
               ?>
@@ -102,8 +115,8 @@
               <!--主页-->
               <li>
                 <a href="<?php $this->options->rootUrl(); ?>/" class="auto">
-                  <i class="iconfont icon-zhuye icon text-md"></i>
-                  <span><?php _me("首页") ?></span>
+                    <span class="nav-icon"><i data-feather="home"></i></span>
+                    <span><?php _me("首页") ?></span>
                 </a>
               </li>
               <!-- /主页 -->
@@ -116,14 +129,22 @@
                 <span><?php _me("组成") ?></span>
               </li>
               <!--分类category-->
+                <?php
+                $class = "";
+                    if (in_array("openCategory",$this->options->featuresetup)){
+                        $class = "class=\"active\"";
+                    }
+                    ?>
               <li class="active">
                 <a class="auto">
                   <span class="pull-right text-muted">
                     <i class="fontello icon-fw fontello-angle-right text"></i>
                     <i class="fontello icon-fw fontello-angle-down text-active"></i>
                   </span>
-                  <i class="glyphicon glyphicon-th"></i>
-                  <span><?php _me("分类") ?></span>
+<!--                  <i class="glyphicon glyphicon-th"></i>-->
+                    <span class="nav-icon"><i data-feather="grid"></i></span>
+
+                    <span><?php _me("分类") ?></span>
                 </a>
                 <ul class="nav nav-sub dk">
                   <li class="nav-sub-header">
@@ -144,7 +165,7 @@
                     <i class="fontello icon-fw fontello-angle-right text"></i>
                     <i class="fontello icon-fw fontello-angle-down text-active"></i>
                   </span>
-                  <i class="glyphicon glyphicon-file"></i>
+                    <span class="nav-icon"><i data-feather="file"></i></span>
                   <span><?php _me("页面") ?></span>
                 </a>
                 <ul class="nav nav-sub dk">
@@ -168,7 +189,7 @@
                     <i class="fontello icon-fw fontello-angle-right text"></i>
                     <i class="fontello icon-fw fontello-angle-down text-active"></i>
                   </span>
-                  <i class="iconfont icon-links"></i>
+                    <span class="nav-icon"><i data-feather="user"></i></span>
                   <span><?php _me("友链") ?></span>
                 </a>
                 <ul class="nav nav-sub dk">
@@ -180,7 +201,7 @@
                   <!--使用links插件，输出全站友链-->
                  <?php $mypattern1 = "<li data-original-title=\"{title}\" data-toggle=\"tooltip\" 
 data-placement=\"top\"><a href=\"{url}\" target=\"_blank\"><span>{name}</span></a></li>";
-                  Links_Plugin::output($mypattern1, 0, "ten");?>
+                  Handsome_Plugin::output($mypattern1, 0, "ten");?>
                 </ul>
               </li>
                 <?php endif; ?>
@@ -190,6 +211,7 @@ data-placement=\"top\"><a href=\"{url}\" target=\"_blank\"><span>{name}</span></
         </div>
           <!--end of .navi-wrap-->
           <!--left_footer-->
+          <?php if (@!in_array('notShowleftBottomMenu',$this->options->indexsetup) && @in_array("aside-fix", $this->options->indexsetup)): ?>
           <div id="left_footer" class="footer wrapper-xs text-center nav-xs lt">
                   <?php if (@in_array('hideLogin',$this->options->featuresetup)){
                       $class = "col-xs-6";
@@ -198,26 +220,27 @@ data-placement=\"top\"><a href=\"{url}\" target=\"_blank\"><span>{name}</span></
                   }; ?>
 
                   <?php if (!@in_array('hideLogin',$this->options->featuresetup)): ?>
-                      <div class="<?php echo $class; ?> footer-stats">
+                      <div class="<?php echo $class; ?> no-padder">
                           <a target="_blank" class="tinav" href="<?php $this->options->adminUrl(); ?>" title="" data-toggle="tooltip" data-placement="top" data-original-title="后台管理">
-                              <span class="block"><i class="fontello fontello-cogs"></i></span>
+                              <span class="left-bottom-icons block"><i data-feather="settings"></i></span>
                               <small class="text-muted"><?php _me("管理") ?></small>
                           </a>
                       </div>
                   <?php endif; ?>
-                  <div class="<?php echo $class; ?> footer-stats">
+                  <div class="<?php echo $class; ?> no-padder">
                       <a target="_blank" class="tinav" href="<?php $this->options->feedUrl(); ?>" title="" data-toggle="tooltip" data-placement="top" data-original-title="文章RSS地址">
-                          <span class="block"><i class="fontello fontello-rss"></i></span>
+                          <span class="left-bottom-icons block"><i data-feather="rss"></i></span>
                           <small class="text-muted"><?php _me("文章") ?></small>
                       </a>
                   </div>
-                  <div class="<?php echo $class; ?> footer-stats">
+                  <div class="<?php echo $class; ?> no-padder">
                       <a target="_blank" href="<?php $this->options->commentsFeedUrl(); ?>" title="" data-toggle="tooltip" data-placement="top" data-original-title="评论RSS地址">
-                          <span class="block"><i class="fontello fontello-rss-square"></i></span>
+                          <span class="left-bottom-icons block"><i data-feather="message-square"></i></span>
                           <small class="text-muted"><?php _me("评论") ?></small>
                       </a>
                   </div>
           </div>
+          <?php endif; ?>
 
       </div><!--.aside-wrap-->
   </aside>

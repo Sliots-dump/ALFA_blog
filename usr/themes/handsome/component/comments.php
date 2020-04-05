@@ -4,7 +4,12 @@
         <style>
             textarea#comment{
                 background-image: url('<?php echo $this->options->commentBackground; ?>');
-                background-color: #fafdff;
+                background-color: #ffffff;
+                transition: all 0.25s ease-in-out 0s;
+            }
+            textarea#comment:focus {
+                background-position-y: 105px;
+                transition: all 0.25s ease-in-out 0s;
             }
         </style>
     <?php endif; ?>
@@ -56,7 +61,7 @@
         ?>">
             <div id="div-<?php $comments->theId(); ?>" class="comment-body">
 
-                <a class="pull-left thumb-sm">
+                <a class="pull-left thumb-sm" rel="nofollow">
                     <?php echo Utils::avatarHtml($comments); ?>
                 </a>
                 <div class="m-b m-l-xxl">
@@ -102,19 +107,27 @@
 
         <!--如果允许评论，会出现评论框和个人信息的填写-->
         <?php if($this->allow('comment')): ?>
-            <div id="<?php $this->respondId(); ?>" class="respond comment-respond">
+            <div id="<?php $this->respondId(); ?>" class="respond comment-respond no-borders">
 
                 <h4 id="reply-title" class="comment-reply-title m-t-lg m-b"><?php _me("发表评论") ?>
+                    <small><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="<?php
+                        $tip = $this->options->commentTips;
+                        if (trim($tip) == ""){
+                            $tip = _mt("使用cookie技术保留您的个人信息以便您下次快速评论，继续评论表示您已同意该条款");
+                        }
+                        echo $tip;
+                        ?>"></i>
+                    </small>
                     <small class="cancel-comment-reply">
                         <?php $comments->cancelReply(_mt('取消回复')); ?>
                     </small>
                 </h4>
                 <form id="comment_form" method="post" action="<?php $this->commentUrl() ?>"  class="comment-form" role="form">
                     <div class="comment-form-comment form-group">
-                        <label for="comment"><?php _me("评论") ?>
+                        <label class="padder-v-sm" for="comment"><?php _me("评论") ?>
                             <span class="required text-danger">*</span></label>
                         <textarea id="comment" class="textarea form-control OwO-textarea" name="text" rows="5" placeholder="<?php _me("说点什么吧……") ?>" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};"><?php $this->remember('text'); ?></textarea>
-                        <div class="OwO"></div>
+                        <div class="OwO padder-v-sm"></div>
                         <div class="secret_comment" id="secret_comment" data-toggle="tooltip"
                         data-original-title="<?php _me("开启该功能，您的评论仅作者和评论双方可见") ?>">
                             <label class="secret_comment_label control-label"><?php _me("私密评论") ?></label>
@@ -128,7 +141,8 @@
                     </div>
                     <!--判断是否登录-->
                     <?php if($this->user->hasLogin()): ?>
-                        <p id="welcomeInfo"><?php _me("欢迎") ?>&nbsp;<a data-no-intant target="blank" href="<?php $this->options->profileUrl(); ?>"><?php $this->user->screenName(); ?></a>&nbsp;<?php _me("归来") ?>！&nbsp;<a href="<?php $this->options->logoutUrl(); ?>" id="logoutIn" title="Logout"><?php _me("退出") ?>&raquo;</a></p>
+                        <p id="welcomeInfo"><?php _me("欢迎") ?>&nbsp;<a data-no-intant target="_blank" href="<?php
+                            $this->options->profileUrl(); ?>"><?php $this->user->screenName(); ?></a>&nbsp;<?php _me("归来") ?>！&nbsp;<a href="<?php $this->options->logoutUrl(); ?>" id="logoutIn" title="Logout"><?php _me("退出") ?>&raquo;</a></p>
                     <?php else : ?>
                     <?php if($this->remember('author',true) != "" && $this->remember('mail',true) != "") : ?>
                     <p><?php _me("欢迎") ?>&nbsp;<a class="show_hide_div" style="color: #333!important;" data-toggle="tooltip" title="点击修改信息"><?php $this->remember('author'); ?></a>&nbsp;<?php _me("归来") ?>！</p>
@@ -161,8 +175,8 @@
                         <?php endif; ?>
                         <!--提交按钮-->
                         <div class="form-group">
-                            <button type="submit" name="submit" id="submit" class="submit btn btn-success padder-lg">
-                                <span class="text"><?php _me("发表评论") ?></span>
+                            <button type="submit" name="submit" id="submit" class="submit btn-rounded box-shadow-wrap-lg btn-gd-primary padder-lg">
+                                <span><?php _me("发表评论") ?></span>
                                 <span class="text-active"><?php _me("提交中") ?>...</span>
                             </button>
                             <i class="animate-spin fontello fontello-spinner hide" id="spin"></i>
@@ -190,6 +204,7 @@
         </div>
     </div>
 <?php else : ?>
+
     <?php $this->need('usr/third_party_comments.php') ?>
 <?php endif; ?>
 

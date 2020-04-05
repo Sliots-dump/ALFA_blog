@@ -1,4 +1,37 @@
 <?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
+
+<?php
+$content = $this->getDescription();
+$content = json_decode($content,true);
+
+$password = Typecho_Cookie::get('category_'.$this->getArchiveSlug());
+
+$cookie = false;//true为可以直接进入
+//这个地方md5不改也行，因为cookie存的也是md5
+if (!empty($password) && $password == Utils::encodeData(@$content['password'])){
+    $cookie = true;
+}
+
+
+if (is_array($content) && @$content['lock'] == true && !$cookie)
+    :?>
+
+<?php
+
+$data = array();
+$data['title'] = $this->getArchiveTitle();
+$data['md5'] = Utils::encodeData($content['password']);
+$data['type'] = "category";
+$data['category'] = $this->getArchiveSlug();
+$data['img'] = @$content['img'];
+
+
+$_GET['data']=$data;
+require_once('libs/Lock.php'); ?>
+
+<?php else: ?>
+
+
 <?php $this->need('component/header.php'); ?>
 
     <!-- aside -->
@@ -9,7 +42,7 @@
   <main class="app-content-body <?php echo Content::returnPageAnimateClass($this); ?>">
     <div class="hbox hbox-auto-xs hbox-auto-sm">
       <div class="col center-part">
-        <header class="bg-light lter b-b wrapper-md">
+        <header class="bg-light lter  wrapper-md">
           <h1 class="m-n font-thin h3 text-black l-h"><?php $this->archiveTitle(array(
             'category'  =>  _mt('分类 %s 下的文章'),
             'search'    =>  _mt('包含关键字 %s 的文章'),
@@ -46,3 +79,4 @@
     <!-- footer -->
     <?php $this->need('component/footer.php'); ?>
     <!-- / footer -->
+<?php endif; ?>

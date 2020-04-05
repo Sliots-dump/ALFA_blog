@@ -20,6 +20,15 @@ class Utils {
         }
     }
 
+    public static function unicodeDecode($unicode_str){
+        $json = '{"str":"'.$unicode_str.'"}';
+        $arr = json_decode($json,true);
+        if(empty($arr)) return '';
+        return html_entity_decode($arr['str']);
+//        return htmlspecialchars($arr['str']);
+    }
+
+
     public static function naturalDate($from,$level) {
         $now = time();
         $between = time() - $from;
@@ -59,7 +68,7 @@ class Utils {
         $email = $obj->mail;
         $avatorSrc = Utils::getAvator($email,65);
 
-        return '<img nogallery src="'.$avatorSrc.'" class="avatar-40 photo img-circle" style="height:40px!important; width: 40px!important;">';
+        return '<img nogallery src="'.$avatorSrc.'" class="img-40px photo img-square normal-shadow">';
 
 
     }
@@ -371,8 +380,10 @@ class Utils {
         }
         if($imageSrc!=null && strpos($imageSrc,$options->rootUrl) === false){//不是本地服务器图片
             $isLocal = false;
+//            echo $imageSrc."|".$options->rootUrl;
         }else{//替换图片的域名地址为云存储空间地址
             $cdnArray = explode("|",$options->cdn_add);
+//            echo $options->rootUrl . "|" .trim($cdnArray[0])."|".$imageSrc;
             $imageSrc = str_ireplace($options->rootUrl,trim($cdnArray[0]),$imageSrc);
             $cdnType = trim($cdnArray[1]);
         }
@@ -386,65 +397,75 @@ class Utils {
      * @param String $cdnType 云服务商类型
      * @param int $width 目标图片的宽度
      * @param int $height 目标图片的高度
+     * @param string $location 是文章的图片还是别的，如首页头图
      * @return string
      */
-    public static function getImageAddOn($options,$isLocal = false,$cdnType = null, $width = 0, $height = 0){
+    public static function getImageAddOn($options,$isLocal = false,$cdnType = null, $width = 0, $height = 0,$location
+    = "index"){
         $addOn = "";//图片后缀
         if (!$isLocal){//不是本地服务器图片
             return $addOn;
         }
-        if ($options->cdn_add!="" && (@in_array('1',$options->cloudOptions) || @in_array('0',$options->cloudOptions))){//开启了镜像存储的功能
+        if ($options->cdn_add!=""){//开启了镜像存储的功能
 
             if ($cdnType == null){//如果参数中没有cdnType，这里会进行获取cdn类型
                 $cdnArray = explode("|",$options->cdn_add);
                 $cdnType = trim($cdnArray[1]);
             }
 
-            if (@in_array('1',$options->cloudOptions)){//启用了webp格式
+            if (@in_array('0',$options->cloudOptions)){//启用了图片处理
                 if ($cdnType == "ALIOSS" || $cdnType == "UPYUN"){//阿里云和又拍云
                     $addOn .= "!";//分隔符
-                }else{//七牛云
+                }else if ($cdnType == "QINIU"){//七牛云
                     $addOn .= "?";//分隔符
+                }else if ($cdnType == "QCLOUD"){
+                    $addOn .= "?imageMogr2";
                 }
-                if ($cdnType == "ALIOSS"){//阿里云
-                    $format = "/format,webp";
-                }else{//又拍云和七牛云
-                    $format = "/format/webp";
+                if ($location == "post"){//为文章中的图片增加自定义后缀
+                    $addOn .= trim($options->imagePostSuffix);
                 }
-                $addOn .= $format;
-            }
-            if (!($width == 0 && $height == 0) && @in_array('0',$options->cloudOptions)){//启用了图片缩放 TODO:优化这个缩放
-                if (trim($addOn) == ""){
-                    if ($cdnType == "ALIOSS" || $cdnType == "UPYUN"){//阿里云和又拍云
-                        $addOn .= "!";//分隔符
-                    }else{//七牛云
-                        $addOn .= "?";//分隔符
+                if (!($width == 0 && $height == 0)){
+                    if ($height == 0){//根据宽度尺寸进行缩放
+                        if ($cdnType == "UPYUN"){
+                            $addOn .= "/fw/$width";
+                        }else if ($cdnType == "ALIOSS"){//阿里云
+                            $addOn .= "/x-oss-process=image/resize,w_$width";
+                        }else if ($cdnType == "QINIU"){//七牛云
+                            $addOn .=  "/imageView2/2/w/$width?imageslim";
+                        }else if ($cdnType == "QCLOUD"){//腾讯云
+                            $addOn .=  "/scrop/".$width."x";
+                        }
+                    }else if ($width === 0){//根据高度尺寸进行缩放
+                        if ($cdnType == "UPYUN"){
+                            $addOn .= "/fh/$height";
+                        }else if ($cdnType == "ALIOSS"){
+                            $addOn .= "/x-oss-process=image/resize,h_$height";
+                        }else if ($cdnType == "QINIU"){//七牛云
+                            $addOn .=  "/imageView2/2/h/$height";
+                        }else if ($cdnType == "QCLOUD"){//腾讯云
+                            $addOn .=  "/scrop/x".$height;
+                        }
+                    }else{//按照固定的宽高进行缩放
+                        if ($cdnType == "UPYUN"){
+                            $addOn .= "/fwfh/".$width."x".$height;
+                        }else if ($cdnType == "ALIOSS"){
+                            $addOn .= "/x-oss-process=image/resize,m_lfit,h_".$height.",w_".$width;
+                        }else if ($cdnType == "QINIU"){//七牛云
+                            $addOn .=  "/imageView2/2/w/".$width."/h/".$height;
+                        }else if ($cdnType == "QCLOUD"){//腾讯云
+                            $addOn .=  "/scrop/".$width."x".$height;
+                        }
                     }
                 }
-                if ($height == 0){//根据宽度尺寸进行缩放
-                    if ($cdnType == "UPYUN"){
-                        $addOn .= "/fw/$width";
-                    }else if ($cdnType == "ALIOSS"){
-                        $addOn .= "/x-oss-process=image/resize,w_$width";
-                    }else{//七牛云
-                        $addOn .=  "/imageView2/2/w/$width";
-                    }
-                }else if ($width === 0){//根据高度尺寸进行缩放
-                    if ($cdnType == "UPYUN"){
-                        $addOn .= "/fh/$height";
-                    }else if ($cdnType == "ALIOSS"){
-                        $addOn .= "/x-oss-process=image/resize,h_$height";
-                    }else{//七牛云
-                        $addOn .=  "/imageView2/2/h/$height";
-                    }
-                }else{
-                    if ($cdnType == "UPYUN"){
-                        $addOn .= "/fwfh/".$width."x".$height;
-                    }else if ($cdnType == "ALIOSS"){
-                        $addOn .= "/x-oss-process=image/resize,m_lfit,h_".$height.",w_".$width;
-                    }else{//七牛云
-                        $addOn .=  "/imageView2/2/w/".$width."/h/".$height;
-                    }
+                //todo:添加图片质量参数
+
+                //添加图片无损压缩参数
+                if ($cdnType == "UPYUN"){
+                    $addOn .= "/compress/true";
+                }else if ($cdnType == "ALIOSS"){
+
+                }else if ($cdnType == "QINIU"){//七牛云
+                    $addOn .=  "?imageslim";
                 }
             }
         }
@@ -472,11 +493,12 @@ class Utils {
         return $lazyLoadHtml. ' style="background-image: url('.$imageSrc.')"';
     }
 
-    public static function returnImageLazyLoadHtml($originalSrc,$width,$height){
+    public static function returnImageLazyLoadHtml($base64 = false,$originalSrc,$width,$height){
         $options = mget();
         $placeholder = Utils::choosePlaceholder($options);
-
-        $originalSrc .= self::getImageAddOn($options,$originalSrc,null,$width,$height);
+        if (!$base64){
+            $originalSrc = self::returnImageSrcWithSuffix($originalSrc,null,$width,$height);
+        }
 
         if (in_array('lazyload',$options->featuresetup)){
             $imageSrc = $placeholder;
@@ -502,7 +524,7 @@ class Utils {
         try{
             $basedir = dirname(dirname(__FILE__))."/usr/img/sj";
             $arr = scandir($basedir);
-            $image = count(preg_grep("/\.jpg$/", $arr));
+            $image = count(preg_grep("/^\d+\.jpg$/", $arr));
             return $image;
         }catch (Exception $e){
             print_r($e);
@@ -518,7 +540,7 @@ class Utils {
         try{
             $basedir = dirname(dirname(__FILE__))."/usr/img/sj2";
             $arr = scandir($basedir);
-            $image = count(preg_grep("/\.jpg$/", $arr));
+            $image = count(preg_grep("/^\d+\.jpg$/", $arr));
             return $image;
         }catch (Exception $e){
             print_r($e);
@@ -591,32 +613,30 @@ class Utils {
     }
 
     public static function getWordsOfContentPost($content){
-        return mb_strlen(trim($content));
+        return mb_strlen(trim($content),"utf8");
     }
 
     /**
      * @param $blogUrl
      * @param $name
      * @param $pic
-     * @param $type string,表示pic内容是网络地址，local表示内容是本地图片
+     * @param $type string,表示$pic内容是网络地址，local表示$pic内容是本地图片
      * @param string $suffix 图片后缀
      * @return string
      */
     public static function uploadPic($blogUrl, $name, $pic,$type,$suffix){
-        $childDir = DIRECTORY_SEPARATOR.'usr'.DIRECTORY_SEPARATOR.'uploads' . DIRECTORY_SEPARATOR .'time' .DIRECTORY_SEPARATOR;
+        $DIRECTORY_SEPARATOR = "/";
+        $childDir = $DIRECTORY_SEPARATOR.'usr'.$DIRECTORY_SEPARATOR.'uploads' . $DIRECTORY_SEPARATOR .'time' .$DIRECTORY_SEPARATOR;
         $dir = __TYPECHO_ROOT_DIR__ . $childDir;
         if (!file_exists($dir)){
             mkdir($dir, 0777, true);
         }
         $fileName = $name. $suffix;
         $file = $dir .$fileName;
-
+        //TODO:支持图片压缩
         if ($type == "web"){
             //开始捕捉
-            ob_start();
-            readfile($pic);
-            $img = ob_get_contents();
-            ob_end_clean();
+            $img = self::getDataFromWebUrl($pic);
         }else{
             $img = $pic;//本地图片直接就是二进制数据
         }
@@ -624,8 +644,116 @@ class Utils {
         fwrite($fp2, $img);
         fclose($fp2);
 
+        //压缩图片
+        (new Imgcompress($file,1))->compressImg($file);
+
         return $blogUrl.$childDir.$fileName;
     }
 
+    public function returnBlogUrl(){
 
+    }
+
+    public static  function getDataFromWebUrl($url){
+        $file_contents = "";
+        if (function_exists('file_get_contents')) {
+            $file_contents = @file_get_contents($url);
+        }
+        if ($file_contents == "") {
+            $ch = curl_init();
+            $timeout = 30;
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+            $file_contents = curl_exec($ch);
+            curl_close($ch);
+        }
+        return $file_contents;
+    }
+
+    public static function isPluginAvailable($className,$dirName){
+        if (class_exists($className)) {
+            $plugins = Typecho_Plugin::export();
+            $plugins = $plugins['activated'];
+            if (is_array($plugins) && array_key_exists($dirName, $plugins)) {
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+
+    }
+
+    public static function isNotice2(){
+        $DIRECTORY_SEPARATOR = "/";
+        $childDir = $DIRECTORY_SEPARATOR.'usr'.$DIRECTORY_SEPARATOR.'themes' . $DIRECTORY_SEPARATOR .'handsome'
+            .$DIRECTORY_SEPARATOR;
+        $dir = __TYPECHO_ROOT_DIR__ . $childDir;
+        $path = $dir."license";
+        //检查license文件
+        if (file_exists($path)){
+            return false;
+        }else{
+            $body = file_get_contents($path);
+            echo $body ;//输入文件内容
+            if ($body == md5(Handsome_Config::AUTH)){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+
+    /**
+     * 加密算法
+     * @param $data 明文数据
+     * @return string
+     */
+    public static function encodeData($data){
+        return self::md5($data);
+//        return sha1(self::md5($data));
+    }
+
+
+    /**
+     * md5 加密，加入特定字符串，避免太过于简单导致的问题
+     * @param $data
+     * @return string
+     */
+    public static function md5($data){
+        return md5("handsome!@#$%^&*()-=+@#$%$".$data."handsome!@#$%^&*()-=+@#$%$");
+    }
+
+    /**
+     * 二维数组去重
+     * @param $arr
+     * @param $key
+     * @return array
+     */
+    public static function array_unset_tt($arr, $key)
+    {
+        //建立一个目标数组
+        $res = array();
+        foreach ($arr as $value) {
+            //查看有没有重复项
+            if (isset($res[$value[$key]])) {
+                //有：销毁
+                unset($value[$key]);
+            } else {
+                $res[$value[$key]] = $value;
+            }
+        }
+        return $res;
+    }
+
+    public static function remove_last_comma($content){
+        if (substr($content,-1) == ","){
+            return substr($content,0,strlen($content)-1);
+        }else{
+            return $content;
+        }
+    }
 }

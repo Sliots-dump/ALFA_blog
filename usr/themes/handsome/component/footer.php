@@ -2,22 +2,25 @@
 <?php Content::outputCommentJS($this, $this->security); ?>
 </div><!-- /content -->
   <footer id="footer" class="app-footer" role="footer">
-    <div class="wrapper b-t bg-light">
-      <span class="pull-right hidden-xs">
+    <div class="wrapper bg-light">
+      <span class="pull-right hidden-xs text-ellipsis">
       <?php $this->options->BottomInfo(); ?>
-      Powered by <a target="blank" href="http://www.typecho.org">Typecho</a>&nbsp;|&nbsp;Theme by <a target="blank" href="https://www.ihewro.com/archives/489/">handsome</a>
+      Powered by <a target="_blank" href="http://www.typecho.org">Typecho</a>&nbsp;|&nbsp;Theme by <a target="_blank"
+                                                                                                     href="https://www.ihewro.com/archives/489/">handsome</a>
       </span>
-      &copy;&nbsp;<?php echo date("Y");?> Copyright&nbsp;<?php $this->options->BottomleftInfo(); ?>
+        <span class="text-ellipsis">&copy;&nbsp;<?php echo date("Y");?> Copyright&nbsp;<?php
+            $this->options->BottomleftInfo(); ?></span>
     </div>
       <!--可以去除主题版权信息，最好保留版权信息或者添加主题信息到友链，谢谢你的理解-->
       <?php if (@in_array('showSettingsButton',$this->options->featuresetup)): ?>
       <script type="text/template" id="tmpl-customizer">
           <div class="settings panel panel-default setting_body_panel" aria-hidden="true">
-              <button class="btn btn-default no-shadow pos-abt" data-toggle="tooltip" data-placement="left" data-original-title="<?php _me("设置") ?>" data-toggle-class=".settings=active, .settings-icon=animate-spin">
+              <button class=" btn btn-default no-shadow pos-abt border-radius-half-left"
+                      data-toggle="tooltip" data-placement="left" data-original-title="<?php _me("设置") ?>" data-toggle-class=".settings=active, .settings-icon=animate-spin">
                   <i class="fontello fontello-gear settings-icon"></i>
               </button>
               <div class="panel-heading">
-                  <button class="pull-right btn btn-xs btn-rounded btn-danger" name="reset" data-toggle="tooltip" data-placement="top" data-original-title="<?php _me("恢复默认值") ?>" ><?php _me("重置") ?></button>
+                  <button class="pull-right btn btn-xs btn-rounded btn-danger " name="reset" data-toggle="tooltip" data-placement="top" data-original-title="<?php _me("恢复默认值") ?>" ><?php _me("重置") ?></button>
                   <?php _me("设置") ?>		</div>
               <div class="setting_body">
               <div class="panel-body">
@@ -60,10 +63,17 @@
           </div>
           </div>
       </script>
+      <?php else: ?>
+      <style>
+          .topButton>.btn{
+              top: 0;
+          }
+          </style>
       <?php endif; ?>
 
       <div class="topButton panel panel-default">
-          <button id="goToTop" class="btn btn-default no-shadow pos-abt hide">
+          <button id="goToTop" class="btn btn-default no-shadow pos-abt hide  border-radius-half-left"
+                  data-toggle="tooltip" data-placement="left" data-original-title="<?php _me("返回顶部") ?>">
               <i class="fontello fontello-chevron-circle-up" aria-hidden="true"></i>
           </button>
       </div>
@@ -80,7 +90,7 @@
             COMMENT_EMAIL_LEGAL_INFO: '<?php _me("邮箱地址不合法") ?>',
             COMMENT_CONTENT_INFO: '<?php _me("必须填写评论内容") ?>',
             COMMENT_SUBMIT_ERROR: '<?php _me("提交失败，请重试！") ?>',
-            COMMENT_CONTENT_LEGAL_INFO: '<?php _me("提交失败,您的输入内容不符合规则！") ?>',
+            COMMENT_CONTENT_LEGAL_INFO: '<?php _me("提交失败,评论被拦截，可能发言太快或内容不符合规则") ?>',
 
             LOGIN_USERNAME_INFO: '<?php _me("必须填写用户名") ?>',
             LOGIN_PASSWORD_INFO: '<?php _me("请填写密码") ?>',
@@ -108,7 +118,10 @@
             IS_PAJX_COMMENT: '<?php echo PJAX_COMMENT_ENABLED; ?>',
             BASE_SCRIPT_URL: '<?php echo THEME_URL; ?>',
             BLOG_URL: '<?php echo BLOG_URL; ?>',
-            THEME_COLOR: '<?php $this->options->themetype(); ?>',
+            BLOG_URL_PHP: '<?php echo BLOG_URL_PHP ?>',
+            THEME_COLOR: '<?php if ((trim($this->options->themetypeEdit) != "")) {echo 14;}else
+                $this->options->themetype(); ?>',
+            THEME_COLOR_EDIT: '<?php $this->options->themetypeEdit() ?>',
             THEME_HEADER_FIX: '<?php echo in_array('header-fix', $this->options->indexsetup) ? true : false; ?>',
             THEME_ASIDE_FIX: '<?php echo in_array('aside-fix', $this->options->indexsetup) ? true : false; ?>',
             THEME_ASIDE_FOLDED: '<?php echo in_array('aside-folded', $this->options->indexsetup) ? true : false; ?>',
@@ -127,7 +140,7 @@
             COMMENT_PLACEHOLDER: '<?php _me('说点什么吧……') ?>',
             SHOW_SETTING_BUTTON: '<?php echo in_array('showSettingsButton', $this->options->featuresetup) ? true :
                 false; ?>',
-            THEME_VERSION: '<?php echo Handsome::$version . Handsome::$versionTag ?>',
+            THEME_VERSION: '<?php echo Handsome::$version . Handsome_Config::$versionTag ?>',
 
             OPERATION_NOTICE: '<?php _me("操作通知") ?>',
             SCREENSHOT_BEGIN: '<?php _me("正在生成当前页面截图……") ?>',
@@ -140,7 +153,8 @@
             MUSIC_LIST_SUCCESS: '<?php _me("歌单歌曲加载成功") ?>',
             CDN_NAME: '<?php if($this->options->cdn_add == "")echo ""; else echo trim(explode("|",
             $this->options->cdn_add)
-            [1]); ?>'
+            [1]); ?>',
+            LAZY_LOAD: '<?php echo in_array('lazyload', $this->options->featuresetup); ?>'
         };
 
     </script>
@@ -149,7 +163,7 @@
 
 <!--CDN加载-->
 <?php $PUBLIC_CDN_ARRAY = unserialize(PUBLIC_CDN); ?>
-<script src="<?php echo $PUBLIC_CDN_ARRAY['js']['bootstrap'] ?>"></script>
+<script src="<?php echo PUBLIC_CDN_PREFIX.$PUBLIC_CDN_ARRAY['js']['bootstrap'] ?>"></script>
 
 
 <?php if (PJAX_ENABLED): ?>
@@ -177,12 +191,13 @@
 
         }).on('pjax:complete', function() {
             window['Page'].doPJAXCompleteAction();
-
-
+            if ($(".post-position").length > 0){
+                window['Page'].doPJAXCompletePostAction();
+            }
             <?php if (@in_array('lazyload',$this->options->featuresetup)): ?>
                 <?php if (in_array('isPageAnimate',$this->options->featuresetup)): ?>
-                $('.app-content-body').animateCss('fadeInUpBig', function() {
-                    $("img").lazyload({
+                $('.app-content-body').animateCss('fadeIn', function() {
+                    $("#post-content img").lazyload({
                         effect: "fadeIn",
                         threshold: "200"
                     });
@@ -193,7 +208,7 @@
                     });
                 });
                 <?php else: ?>
-                $("img").lazyload({
+                $("#post-content img").lazyload({
                     effect: "fadeIn",
                     threshold: "200"
                 });
@@ -222,10 +237,11 @@
 
 <!--主题组件js加载-->
 
-<?php if (!empty($this->options->featuresetup) && in_array('smoothscroll', $this->options->featuresetup)): ?>
+<?php if (!empty($this->options->featuresetup) && in_array('smoothscroll', $this->options->featuresetup) && Device::isWindowsAboveVista() && Device::is('Chrome', 'Edge')): ?>
     <!--平滑滚动组件-->
     <script src="<?php echo STATIC_PATH ?>js/features/SmoothScroll.min.js"></script>
 <?php endif; ?>
+
 
 <!--pjax动画组件-->
 <?php if($this->options->pjaxAnimate !== "default"): ?>
@@ -242,7 +258,8 @@
     <script src="<?php echo STATIC_PATH ?>js/features/pace.min.js"></script>
 
 <?php if(!($this->options->pjaxAnimate == "default" || $this->options->pjaxAnimate == "" || $this->options->pjaxAnimate == "whiteRound" || $this->options->pjaxAnimate == "customise")): ?>
-    <link href="<?php echo STATIC_PATH ?>css/features/pjax/pace-theme-<?php $this->options->pjaxAnimate ()?>.css" rel="stylesheet">
+    <link href="<?php echo STATIC_PATH ?>css/features/pjax/pace-theme-<?php $this->options->pjaxAnimate ()?>.min.css"
+          rel="stylesheet">
 <?php endif; ?>
 
     <?php if (trim($this->options->progressColor) !== ""): ?>
@@ -297,19 +314,25 @@
     </script>
 <?php endif; ?>
 
+<script src="<?php echo STATIC_PATH ?>js/features/feather.min.js?v=<?php echo Handsome::$version.Handsome_Config::$versionTag ?>"></script>
+
 <?php if (@in_array('mathJax',$this->options->featuresetup)): ?>
     <!--maxJax公式组件-->
-    <script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js" type="text/javascript"></script>
-    <script src="//cdn.bootcss.com/mathjax/2.7.0/config/TeX-AMS-MML_SVG.js" type="text/javascript"></script>
+    <?php $PUBLIC_CDN_ARRAY = unserialize(PUBLIC_CDN); ?>
+    <script src="<?php echo $PUBLIC_CDN_ARRAY['js']['mathjax']?>" type="text/javascript"></script>
+    <script src="<?php echo $PUBLIC_CDN_ARRAY['js']['mathjax_svg']?>" type="text/javascript"></script>
 <?php endif; ?>
 
 
+
 <!--lightgallery必备组件-->
-<script src="<?php echo STATIC_PATH ?>js/features/jquery.fancybox.min.js?v=<?php echo Handsome::$version.Handsome::$versionTag ?>"></script>
+<script src="<?php echo STATIC_PATH ?>js/features/jquery.fancybox.min.js?v=<?php echo Handsome::$version.Handsome_Config::$versionTag ?>"></script>
+<script src="<?php echo STATIC_PATH ?>js/features/easypiechart.min.js?v=<?php echo Handsome::$version.Handsome_Config::$versionTag ?>"></script>
+
 
 <?php if($this->options->commentChoice =='0'): ?>
     <!--component/comments.php 页面必需js（只有选择了原生评论的时候才会加载）-->
-    <script src="<?php echo STATIC_PATH ?>js/features/OwO.min.js?v=<?php echo Handsome::$version.Handsome::$versionTag
+    <script src="<?php echo STATIC_PATH ?>js/features/OwO.min.js?v=<?php echo Handsome::$version.Handsome_Config::$versionTag
     ?>"></script>
     <!--component/comments.php 必需js结束-->
 <?php endif; ?>
@@ -322,15 +345,16 @@
 <!--主题组件js加载结束-->
 
 <!--主题核心js-->
-    <script src="<?php echo STATIC_PATH ?>js/function.min.js?v=<?php echo Handsome::$version.Handsome::$versionTag
+    <script src="<?php echo STATIC_PATH ?>js/function.min.js?v=<?php echo Handsome::$version.Handsome_Config::$versionTag
     ?>"></script>
-    <script src="<?php echo STATIC_PATH ?>js/core.min.js?v=<?php echo Handsome::$version.Handsome::$versionTag
+    <script src="<?php echo STATIC_PATH ?>js/core.min.js?v=<?php echo Handsome::$version.Handsome_Config::$versionTag
 ?>"></script>
 
 
 <?php if(@in_array('musicplayer',$this->options->featuresetup)): ?>
     <!--全局播放器组件-->
-    <script src="<?php echo STATIC_PATH ?>js/music.min.js?v=<?php echo Handsome::$version.Handsome::$versionTag
+    <script src="<?php echo STATIC_PATH ?>js/features/music.min.js?v=<?php echo Handsome::$version
+        .Handsome_Config::$versionTag
     ?>"></script>
     <script>
         <?php
@@ -374,7 +398,7 @@
 
 <?php if (in_array('showSettingsButton', $this->options->featuresetup)): ?>
     <script src="<?php echo STATIC_PATH ?>js/features/setting.min.js?v=<?php echo Handsome::$version
-        .Handsome::$versionTag
+        .Handsome_Config::$versionTag
     ?>"></script>
 <?php endif; ?>
 

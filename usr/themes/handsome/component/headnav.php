@@ -1,18 +1,18 @@
   <?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
-  <header id="header" class="app-header navbar" role="menu">
+  <header id="header" class="fix-padding app-header navbar box-shadow-bottom-lg" role="menu">
       <!-- navbar header（交集处） -->
         <?php echo Content::slectNavbarHeader(); ?>
 
-        <button class="pull-right visible-xs dk" ui-toggle-class="show animated animated-lento fadeIn" target=".navbar-collapse">
-          <i class="fontello fontello-gear text-lg"></i>
+        <button class="pull-right visible-xs" ui-toggle-class="show animated animated-lento fadeIn" target=".navbar-collapse">
+            <span class="menu-icons"><i data-feather="search"></i></span>
         </button>
         <button class="pull-left visible-xs" ui-toggle-class="off-screen animated" target=".app-aside" ui-scroll="app">
-          <i class="fontello fontello-menu text-lg"></i>
+            <span class="menu-icons"><i data-feather="menu"></i></span>
         </button>
         <!-- brand -->
         <a href="<?php $this->options->rootUrl(); ?>/" class="navbar-brand text-lt">
             <?php if ($this->options->logo!=""): ?>
-            <img src="<?php echo $this->options->logo; ?>">
+                <?php echo $this->options->logo; ?>
             <?php else: ?>
                 <?php if ($this->options->indexNameIcon == ""): ?>
                     <i class="fontello fontello-home"></i>
@@ -28,28 +28,25 @@
 
       <!-- navbar collapse（顶部导航栏） -->
     <?php echo Content::selectNavbarCollapse() ?>
-        <!-- buttons -->
-        <div class="nav navbar-nav hidden-xs">
-          <a href="#" class="btn no-shadow navbar-btn" ui-toggle-class="app-aside-folded" target=".app">
-            <i class="fontello fontello-dedent text icon-fw"></i>
-            <i class="fontello fontello-indent icon-fw text-active"></i>
-          </a>
-
-        </div>
-        <!-- / buttons -->
-
 
         <!-- search form -->
         <form id="searchform1" class="searchform navbar-form navbar-form-sm navbar-left shift" method="post"
               role="search">
           <div class="form-group">
-            <div class="input-group rounded bg-light">
-              <input autocomplete="off" id="search_input" type="search" name="s" class="transparent rounded form-control input-sm no-border padder" required placeholder="<?php _me("输入关键词搜索…") ?>">
+            <div class="input-group rounded bg-white-pure box-shadow-wrap-normal">
+              <input  autocomplete="off" id="search_input" type="search" name="s" class="transparent rounded form-control input-sm no-borders padder" required placeholder="<?php _me("输入关键词搜索…") ?>">
                 <!--搜索提示-->
-                <ul id="search_tips_drop" class="dropdown-menu hide" style="display: block;top: 30px; left: 0px;">
+                <ul id="search_tips_drop" class="small-scroll-bar dropdown-menu hide" style="display: block;top: 
+                30px; left: 0px;">
                 </ul>
               <span id="search_submit" class="transparent input-group-btn">
-                  <button  type="submit" class="transparent btn btn-sm"><i class="fontello fontello-search"></i></button>
+                  <button  type="submit" class="transparent btn btn-sm">
+                      <span class="feathericons" id="icon-search"><i data-feather="search"></i></span>
+                      <span class="feathericons animate-spin  hide" id="spin-search"><i
+                                  data-feather="loader"></i></span>
+<!--                      <i class="fontello fontello-search" id="icon-search"></i>-->
+<!--                      <i class="animate-spin  fontello fontello-spinner hide" id="spin-search"></i>-->
+                  </button>
               </span>
             </div>
           </div>
@@ -61,7 +58,7 @@
         $hideTalkItem = false;
         $headerItemsOutput = "";
         if (!empty(Typecho_Widget::widget('Widget_Options')->headerItems)){
-          $json = '['.Typecho_Widget::widget('Widget_Options')->headerItems.']';
+          $json = '['.Utils::remove_last_comma(Typecho_Widget::widget('Widget_Options')->headerItems).']';
           $headerItems = json_decode($json);
           foreach ($headerItems as $headerItem){
             $itemName = $headerItem->name;
@@ -91,15 +88,17 @@
             <li class="music-box hidden-xs hidden-sm">
                 <div id="skPlayer"></div>
             </li>
-            <li class="dropdown "><a class="skPlayer-list-switch dropdown-toggle"><i class="fontello fontello-headphones"></i><span class="visible-xs-inline"></span></a></li>
+            <li class="dropdown "><a class="skPlayer-list-switch dropdown-toggle
+            feathericons"><i
+                            data-feather="disc"></i><span class="visible-xs-inline"></span></a></li>
             <?php endif; ?>
             <?php echo $headerItemsOutput; ?>
             <?php if (!$hideTalkItem): ?>
           <!--闲言碎语-->
           <li class="dropdown">
-            <a href="#" data-toggle="dropdown" class="dropdown-toggle">
-              <i class="fontello fontello-bell icon-fw"></i>
-              <span class="visible-xs-inline">
+            <a href="#" data-toggle="dropdown" class="feathericons dropdown-toggle">
+                <i data-feather="twitch"></i>
+                <span class="visible-xs-inline">
               <?php _me("闲言碎语") ?>
               </span>
               <span class="badge badge-sm up bg-danger pull-right-xs"><?php
@@ -108,7 +107,7 @@
                   if (!empty($read_id) && !empty($latest_time_id)){
                       $not_read = $latest_time_id - $read_id;
                       if ($not_read > 0){
-                          echo $latest_time_id - $read_id;
+                          _me("新");
                       }
                   }
                   ?></span>
@@ -133,7 +132,6 @@
                   $options = $this->options;    //Typecho_Widget::widget('Widget_Options');
 
                   $page = $db->fetchRow($db->select()->from('table.contents')
-                      ->where('table.contents.status = ?', 'publish')
                       ->where('table.contents.created < ?', $options->gmtTime)
                       ->where('table.contents.slug = ?', $slug));
 
@@ -162,10 +160,10 @@
                              $content = _mt("点击查看详情");
                          }
 
-                       echo '<a href="'.$this->options->rootUrl.'/index.php/cross.html" class="list-group-item"><span class="clear block m-b-none words_contents">'.$content.'<br><small class="text-muted">'.date('Y-n-j H:i:s',$comment['created']+($this->options->timezone - idate("Z"))).'</small></span></a>';
+                       echo '<a href="'.BLOG_URL_PHP.'cross.html" class="list-group-item"><span class="clear block m-b-none words_contents">'.Content::excerpt($content,200).'<br><small class="text-muted">'.date('Y-n-j H:i:s',$comment['created']+($this->options->timezone - idate("Z"))).'</small></span></a>';
                       }
                   } else {
-                      echo '<a href="'.$this->options->rootUrl.'/cross.html" class="list-group-item"><span class="clear block m-b-none">这是一条默认的说说，如果你看到这条动态，请去后台新建独立页面，地址填写cross,自定义模板选择时光机。具体说明请参见主题的使用攻略。<br><small class="text-muted">'.date("F jS, Y \a\t h:i a",time()+($this->options->timezone - idate("Z"))).'</small></span></a>';
+                      echo '<a href="'.BLOG_URL_PHP.'/cross.html" class="list-group-item"><span class="clear block m-b-none">这是一条默认的说说，如果你看到这条动态，请去后台新建独立页面，地址填写cross,自定义模板选择时光机。具体说明请参见主题的使用攻略。<br><small class="text-muted">'.date("F jS, Y \a\t h:i a",time()+($this->options->timezone - idate("Z"))).'</small></span></a>';
                   }?>
                 </div>
               </div>
@@ -179,12 +177,12 @@
             <a onclick="return false" data-toggle="dropdown" class="dropdown-toggle clear" data-toggle="dropdown">
             <?php if($this->user->hasLogin()): ?>
               <span class="thumb-sm avatar pull-right m-t-n-sm m-b-n-sm m-l-sm">
-                <img src="<?php echo Utils::getAvator($this->user->mail,65) ?>">
+                <img class="img-circle img-40px" src="<?php echo Utils::getAvator($this->user->mail,65) ?>">
                 <i class="on md b-white bottom"></i>
               </span>
               <span class="hidden-sm hidden-md"><?php $this->user->screenName(); ?></span>
             <?php else: ?>
-            <span class="text"><?php _me("登录") ?></span>
+            <span class="feathericons"><i data-feather="key"></i></span>
           <?php endif; ?>
               <b class="caret"></b><!--下三角符号-->
             </a>
@@ -235,7 +233,7 @@
             </ul>
             <!-- / dropdown(已经登录) -->
           <?php else: ?>
-          <div class="dropdown-menu w-lg wrapper bg-white animated shake" aria-labelledby="navbar-login-dropdown">
+          <div class="dropdown-menu w-lg wrapper bg-white animated fadeIn" aria-labelledby="navbar-login-dropdown">
             <form id="Login_form" action="<?php $this->options->loginAction();?>" method="post">
               <div class="form-group">
                 <label for="navbar-login-user"><?php _me("用户名") ?></label>
@@ -243,13 +241,15 @@
               <div class="form-group">
                 <label for="navbar-login-password"><?php _me("密码") ?></label>
                 <input type="password" name="password" id="navbar-login-password" class="form-control" placeholder="<?php _me("密码") ?>"></div>
-              <button type="submit" id="login-submit" name ="submitLogin" class="btn btn-block btn-primary">
-              <span class="text"><?php _me("登录") ?></span>
-              <span class="text-active"><?php _me("登录中") ?>...</span>
-                  <span class="banLogin_text"><?php _me("刷新页面后登录") ?></span>
-              <i class="animate-spin  fontello fontello-spinner hide" id="spin-login"></i>
-                  <i class="animate-spin fontello fontello-refresh hide" id="ban-login"></i>
-              </button>
+                <button style="width: 100%" type="submit" id="login-submit" name ="submitLogin" class="btn-rounded box-shadow-wrap-lg btn-gd-primary padder-lg">
+                    <span><?php _me("登录") ?></span>
+                    <span class="text-active"><?php _me("登录中") ?>...</span>
+                    <span class="banLogin_text"><?php _me("刷新页面后登录") ?></span>
+                    <i class="animate-spin  fontello fontello-spinner hide" id="spin-login"></i>
+                    <i class="animate-spin fontello fontello-refresh hide" id="ban-login"></i>
+                </button>
+
+
               <?php $http_type = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? 'https://' : 'http://'; ?>
 
               <input type="hidden" name="referer" value="<?php $this->options->rootUrl(); ?>"

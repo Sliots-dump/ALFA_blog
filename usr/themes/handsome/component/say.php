@@ -1,4 +1,5 @@
 <?php
+$GLOBALS['isLogin'] = $this->user->hasLogin();
 
 $GLOBALS['max_read_id'] = Typecho_Cookie::get('user_read_id');
 function threadedComments($comments, $options) {
@@ -33,7 +34,7 @@ function threadedComments($comments, $options) {
             <?php echo Utils::avatarHtml($comments); ?>
         </a>
 
-        <div class="time-machine m-l-lg panel b-a">
+        <div class="time-machine m-l-lg panel box-shadow-wrap-normal">
             <div class="panel-heading pos-rlt b-b b-light">
                 <span class="arrow left"></span>
                 <?php $comments->author(); ?>
@@ -41,10 +42,11 @@ function threadedComments($comments, $options) {
                 </span>
             </div>
             <div class="panel-body">
-                <?php echo Content::timeMachineCommentContent($comments->content); ?>
+                <?php  echo Content::postCommentContent(Content::timeMachineCommentContent($comments->content),$GLOBALS['isLogin'] ,"","","",true); ?>
             </div>
             <div class="panel-footer">
                 <div class="say_footer">
+<!--                评论，可能会写，但是没想好样式    <a href="" class="text-muted m-xs"><i class="iconfont icon-redo"></i></a>-->
                     <a data-coid="<?php echo $comments->coid; ?>" class="text-muted star_talk"><i class="glyphicon <?php
                         $stars = Typecho_Cookie::get('extend_say_stars');
                         if(empty($stars)){
@@ -71,7 +73,14 @@ function threadedComments($comments, $options) {
                             }
                             ?></span></a>
                     <span class="text-muted">
-                        <i class="glyphicon glyphicon-record  m-l-sm"></i>&nbsp;<?php  ($comments->agent == "weChat") ? _me("发自微信") : _me("发自网页端");?></span>
+                        <?php
+                        $ua = new UA($comments->agent);
+                        ?>
+                        <span class="ua-icons"><i data-feather='<?php echo $ua->returnTimeUa()['icon'] ?>'></i></span>
+                        <?php
+                        echo "发自".$ua->returnTimeUa()['title'];
+                        ?>
+                    </span>
                 </div>
             </div>
         </div>
@@ -84,16 +93,24 @@ function threadedComments($comments, $options) {
     <?php if($this->allow('comment')): ?>
         <!--判断是否登录，只有登陆者才有权利发表说说-->
         <?php if($this->user->hasLogin()): ?>
-            <div id="<?php $this->respondId(); ?>" class="respond comment-respond">
+            <div id="<?php $this->respondId(); ?>" class="respond comment-respond no-borders border-radius-6">
 
-                <div class="panel panel-default m-t-md pos-rlt m-b-lg">
+                <div class="panel panel-default m-t-md pos-rlt m-b-lg no-borders border-radius-6">
                     <form id="comment_form" action="<?php $this->commentUrl() ?>" method="post" class="comment-form" role="form">
-                        <textarea id="comment" class="textarea form-control no-border" name="text" rows="3" maxlength="65525" aria-required="true"><?php $this->remember('text'); ?></textarea>
-
+                        <textarea id="comment" class="border-radius-6-top textarea form-control no-border" name="text" rows="3" maxlength="65525" aria-required="true"><?php $this->remember('text'); ?></textarea>
+                        <div class="secret_comment" id="secret_comment">
+                            <label class="secret_comment_label control-label">私密</label>
+                            <div class="secret_comment_check">
+                                <label class="i-switch i-switch-sm bg-dark m-b-ss m-r">
+                                    <input type="checkbox" id="secret_comment_checkbox">
+                                    <i></i>
+                                </label>
+                            </div>
+                        </div>
                         <!--提交按钮-->
-                        <div class="panel-footer bg-light lter">
+                        <div class="panel-footer bg-light lter border-radius-6-bottom">
                             <button type="submit" name="submit" id="submit" class="submit btn btn-info pull-right btn-sm">
-                                <span class="text"><?php _me("发表新鲜事") ?></span>
+                                <span><?php _me("发表新鲜事") ?></span>
                                 <span class="text-active"><?php _me("提交中") ?>...
             <i class="animate-spin fontello fontello-spinner hide" id="spin"></i>
           </span>
@@ -123,7 +140,7 @@ function threadedComments($comments, $options) {
     <?php $this->comments()->to($comments);
     ?>
     <?php if ($comments->have()): ?>
-        <div class="streamline b-l b-info m-l-lg m-b padder-v">
+        <div class="streamline b-l m-l-lg m-b padder-v">
 
             <h4 style="display: none" class="comments-title m-t-lg m-b">&nbsp;<?php $this->commentsNum(_mt('暂无评论'), _mt('1 条评论'), _mt(' %d 条评论')); ?></h4>
             <?php $comments->listComments();

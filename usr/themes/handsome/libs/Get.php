@@ -49,6 +49,15 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
 
 }
 
+/**
+ * 从分享文字中解析出链接
+ * @param $text
+ * @return string
+ */
+function parseMusicShareText($text){
+
+    return "";
+}
 
 /**
  * @param $url
@@ -147,9 +156,12 @@ function getMusicInfo($media = 'netease', $type = 'song', $id = ''){
             /**
              * 修复网易云音乐防止盗链
              */
-            if ($media = 'netease'){
+            if ($media == 'netease'){
                 $url = str_replace("http://m7c","http://m7",$url);
                 $url = str_replace("http://m8c","http://m8",$url);
+            }
+            if ($media == "tencent"){
+                $url = str_ireplace("ws.stream.qqmusic.qq.com","dl.stream.qqmusic.qq.com",$url);
             }
             $url = str_replace("http://","https://", $url);
             $info = array(

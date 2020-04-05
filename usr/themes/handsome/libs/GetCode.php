@@ -9,11 +9,13 @@ require_once './phpqrcode.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "GET"){
 
-
-
+    $query=  '?'.$_SERVER['QUERY_STRING'];
+    $index = strpos($query,"&content=");
+    $url = substr($query,$index+9);
+//    print_r($url);
     if (!empty($_GET['type']) && !empty($_GET['content'])){
         $type = $_GET['type'];
-        $content = $_GET['content'];
+        $content = $url;
         getImageCode($content,$type);
     }
 

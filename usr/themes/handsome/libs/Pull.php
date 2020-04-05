@@ -14,15 +14,15 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 // 举个例子 http://www.ihewro.com/?action=pullsina&key=ihewro
 
 //【变量说明】：这个变量是为了防止别人恶意调用接口设置的，调用该接口的时候key参数的值要与这个变量对应
-$GLOBALS['key'] = "alfa8D74";
+$GLOBALS['key'] = "ihewro";
 
 // 【变量说明】：
-//  false 表示执行该接口不会修改数据库内容，只会显示数据库中含有新浪图床的数目信息，
-//  true 表示会自动下载新浪图片图片到本地服务器并修改数据库内容
-$GLOBALS['is_replace'] = true;
+//  true 表示执行该接口不会修改数据库内容，只会显示数据库中含有新浪图床的数目信息，
+//  false 表示会自动下载新浪图片图片到本地服务器并修改数据库内容
+$GLOBALS['is_replace'] = false;
 
 // 【变量说明】每次替换的数目，为了防止替换数目太多一直处于等待状态，你可以将这个变量设置较小的值，多次调用该接口
-$GLOBALS['limit'] = 5;
+$GLOBALS['limit'] = 9999;
 
 //这个变量请勿修改值
 $GLOBALS['haveNum'] = 0;//已经替换的图片数目

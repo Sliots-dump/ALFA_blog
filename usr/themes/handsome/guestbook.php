@@ -19,19 +19,19 @@
     <!--文章-->
      <div class="col center-part">
     <!--标题下的一排功能信息图标：作者/时间/浏览次数/评论数/分类-->
-         <?php echo Content::exportPostPageHeader($this,$this->user->hasLogin()); ?>
+         <?php echo Content::exportPostPageHeader($this,$this->user->hasLogin(),true); ?>
       <div class="wrapper-md" id="post-panel">
        <?php Content::BreadcrumbNavigation($this, $this->options->rootUrl); ?>
        <!--博客文章样式 begin with .blog-post-->
        <div id="postpage" class="blog-post">
-        <article class="panel">
+        <article class="single-post panel">
         <!--文章页面的头图-->
             <?php echo Content::exportHeaderImg($this); ?>
          <!--文章内容-->
          <div class="wrapper-lg">
           <?php getFriendWall(); ?>
           <div class="entry-content l-h-2x">
-              <?php Content::postContent($this,$this->user->hasLogin()); ?>
+              <?php echo Content::postContent($this,$this->user->hasLogin()); ?>
           </div>
              <?php Content::pageFooter($this->options) ?>
          </div>
