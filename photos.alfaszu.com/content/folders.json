@@ -459,7 +459,8 @@
         "url": "works\/cosplay\/2017-2018"
     },
     "works\/resource": {
-        "url": "works\/resource"
+        "url": "works\/resource",
+        "hidden": true
     },
     "works\/resource\/banner": {
         "url": "works\/resource\/banner"
@@ -469,5 +470,23 @@
     },
     "works\/resource\/publication": {
         "url": "works\/resource\/publication"
+    },
+    "works\/resource\/card": {
+        "url": "works\/resource\/card"
+    },
+    "works\/resource\/kanban": {
+        "url": "works\/resource\/kanban"
+    },
+    "works\/resource\/curtain": {
+        "url": "works\/resource\/curtain"
+    },
+    "works\/resource\/board": {
+        "url": "works\/resource\/board"
+    },
+    "works\/resource\/map": {
+        "url": "works\/resource\/map"
+    },
+    "works\/resource\/leaflet": {
+        "url": "works\/resource\/leaflet"
     }
 }
