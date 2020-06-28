@@ -457,5 +457,17 @@
     },
     "works\/cosplay\/2017-2018": {
         "url": "works\/cosplay\/2017-2018"
+    },
+    "works\/resource": {
+        "url": "works\/resource"
+    },
+    "works\/resource\/banner": {
+        "url": "works\/resource\/banner"
+    },
+    "works\/resource\/LOGO": {
+        "url": "works\/resource\/LOGO"
+    },
+    "works\/resource\/publication": {
+        "url": "works\/resource\/publication"
     }
 }
