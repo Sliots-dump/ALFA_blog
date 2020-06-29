@@ -450,13 +450,16 @@
         "url": "works\/cosplay"
     },
     "works\/cosplay\/2013-2014": {
-        "url": "works\/cosplay\/2013-2014"
+        "url": "works\/cosplay\/2013-2014",
+        "index": 3
     },
     "works\/cosplay\/2014-2015": {
-        "url": "works\/cosplay\/2014-2015"
+        "url": "works\/cosplay\/2014-2015",
+        "index": 2
     },
     "works\/cosplay\/2017-2018": {
-        "url": "works\/cosplay\/2017-2018"
+        "url": "works\/cosplay\/2017-2018",
+        "index": 1
     },
     "works\/resource": {
         "url": "works\/resource",
@@ -488,5 +491,17 @@
     },
     "works\/resource\/leaflet": {
         "url": "works\/resource\/leaflet"
+    },
+    "works\/cosplay\/2010": {
+        "url": "works\/cosplay\/2010",
+        "index": 5
+    },
+    "works\/cosplay\/2010\/bad": {
+        "hidden": true,
+        "url": "works\/cosplay\/2010\/bad"
+    },
+    "works\/cosplay\/2011": {
+        "url": "works\/cosplay\/2011",
+        "index": 4
     }
 }
