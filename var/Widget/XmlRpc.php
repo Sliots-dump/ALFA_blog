@@ -1,4 +1,10 @@
-<?php
+<?php /** @noinspection DuplicatedCode */
+/** @noinspection PhpUndefinedFunctionInspection */
+/** @noinspection PhpUnused */
+/** @noinspection PhpRedundantCatchClauseInspection */
+/** @noinspection PhpUnusedParameterInspection */
+/** @noinspection SpellCheckingInspection */
+/** @noinspection PhpUndefinedFieldInspection */
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 /**
  * Typecho Blog Platform
@@ -26,155 +32,15 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
      * @var IXR_Error
      */
     private $error;
-    
-    /**
-     * wordpress风格的系统选项
-     * 
-     * @access private
-     * @var array
-     */
-    private $_wpOptions;
-    
+
     /**
      * 已经使用过的组件列表
-     * 
+     *
      * @access private
      * @var array
      */
     private $_usedWidgetNameList = array();
-    
-    /**
-     * 获取扩展字段
-     * 
-     * @access private
-     * @param Widget_Abstract_Contents $content
-     * @return array
-     */
-    private function getPostExtended(Widget_Abstract_Contents $content)
-    {
-        //根据客户端显示来判断是否显示html代码
-        $agent = $this->request->getAgent();
-        $text = '';
-        
-        switch (true) {
-            case false !== strpos($agent, 'wp-iphone'):   // wordpress iphone客户端
-            case false !== strpos($agent, 'wp-blackberry'):  // 黑莓
-            case false !== strpos($agent, 'wp-andriod'):  // andriod
-            case false !== strpos($agent, 'plain-text'):  // 这是预留给第三方开发者的接口, 用于强行调用非所见即所得数据
-            case $this->options->xmlrpcMarkdown:
-                $text = $content->text;
-                break;
-            default:
-                $text = $content->content;
-                break;
-        }
-    
-        $post = explode('<!--more-->', $text, 2);
-        return array(
-            $this->options->xmlrpcMarkdown? $post[0] : Typecho_Common::fixHtml($post[0]),
-            isset($post[1]) ? Typecho_Common::fixHtml($post[1]) : NULL
-        );
-    }
-    
-    /**
-     * 将typecho的状态类型转换为wordperss的风格
-     * 
-     * @access private
-     * @param string $status typecho的状态
-     * @param string $type 内容类型
-     * @return string
-     */
-    private function typechoToWordpressStatus($status, $type = 'post')
-    {
-        if ('post' == $type) {
-            /** 文章状态 */
-            switch ($status) {
-                case 'waiting':
-                    return 'pending';
-                case 'publish':
-                case 'draft':
-                case 'private':
-                    return $status;
-                default:
-                    return 'publish';
-            }
-        } else if ('page' == $type) {
-            switch ($status) {
-                case 'publish':
-                case 'draft':
-                case 'private':
-                    return $status;
-                default:
-                    return 'publish';
-            }
-        } else if ('comment' == $type) {
-            switch ($status) {
-                case 'publish':
-                case 'approved':
-                    return 'approve';
-                case 'waiting':
-                    return 'hold';
-                case 'spam':
-                    return $status;
-                default:
-                    return 'approve';
-            }
-        }
-        
-        return '';
-    }
-    
-    /**
-     * 将wordpress的状态类型转换为typecho的风格
-     * 
-     * @access private
-     * @param string $status wordpress的状态
-     * @param string $type 内容类型
-     * @return string
-     */
-    private function wordpressToTypechoStatus($status, $type = 'post')
-    {
-        if ('post' == $type) {
-            /** 文章状态 */
-            switch ($status) {
-                case 'pending':
-                    return 'waiting';
-                case 'publish':
-                case 'draft':
-                case 'private':
-                case 'waiting':
-                    return $status;
-                default:
-                    return 'publish';
-            }
-        } else if ('page' == $type) {
-            switch ($status) {
-                case 'publish':
-                case 'draft':
-                case 'private':
-                    return $status;
-                default:
-                    return 'publish';
-            }
-        } else if ('comment' == $type) {
-            switch ($status) {
-                case 'approve':
-                case 'publish':
-                case 'approved':
-                    return 'approved';
-                case 'hold':
-                case 'waiting':
-                    return 'waiting';
-                case 'spam':
-                    return $status;
-                default:
-                    return 'approved';
-            }
-        }
-        
-        return '';
-    }
-    
+
     /**
      * 代理工厂方法,将类静态化放置到列表中
      *
@@ -196,7 +62,7 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
      * 如果这里没有重载, 每次都会被默认执行
      *
      * @access public
-     * @param boolen $run 是否执行
+     * @param bool $run 是否执行
      * @return void
      */
     public function execute($run = false)
@@ -204,1204 +70,579 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
         if ($run) {
             parent::execute();
         }
-
         // 临时保护模块
         $this->security->enable(false);
-        
-        $this->_wpOptions = array(
-			// Read only options
-			'software_name'		=> array(
-				'desc'			=> _t( '软件名称' ),
-				'readonly'		=> true,
-				'value'			=> $this->options->software
-			),
-			'software_version'	=> array(
-				'desc'			=> _t( '软件版本' ),
-				'readonly'		=> true,
-				'value'			=> $this->options->version
-			),
-			'blog_url'			=> array(
-				'desc'			=> _t( '博客地址' ),
-				'readonly'		=> true,
-				'option'		=> 'siteUrl'
-			),
-            'home_url'          => array(
-                'desc'          => _t( '博客首页地址' ),
-                'readonly'      => true,
-                'option'        => 'siteUrl'
-            ),
-            'login_url'         => array(
-                'desc'          => _t( '登录地址' ),
-                'readonly'      => true,
-                'value'         => $this->options->siteUrl.'admin/login.php'
-            ),
-             'admin_url'        => array(
-                'desc'          => _t( '管理区域的地址' ),
-                'readonly'      => true,
-                'value'         => $this->options->siteUrl.'admin/'
-            ),
-
-            'post_thumbnail'    => array(
-                'desc'          => _t( '文章缩略图' ),
-                'readonly'      => true,
-                'value'         => false
-            ),
-
-			// Updatable options
-			'time_zone'			=> array(
-				'desc'			=> _t( '时区' ),
-				'readonly'		=> false,
-				'option'		=> 'timezone'
-			),
-			'blog_title'		=> array(
-				'desc'			=> _t( '博客标题' ),
-				'readonly'		=> false,
-				'option'			=> 'title'
-			),
-			'blog_tagline'		=> array(
-				'desc'			=> _t( '博客关键字' ),
-				'readonly'		=> false,
-				'option'		=> 'description'
-			),
-			'date_format'		=> array(
-				'desc'			=> _t( '日期格式' ),
-				'readonly'		=> false,
-				'option'		=> 'postDateFormat'
-			),
-			'time_format'		=> array(
-				'desc'			=> _t( '时间格式' ),
-				'readonly'		=> false,
-				'option'		=> 'postDateFormat'
-			),
-			'users_can_register'	=> array(
-				'desc'			=> _t( '是否允许注册' ),
-				'readonly'		=> false,
-				'option'		=> 'allowRegister'
-			)
-		);
     }
+
+    public function GetManifest($version)
+    {
+        return array(
+            "engineName" => "typecho",
+            "versionCode" => 11,
+            "versionName" => "2.0",
+            "manifest" => $version
+        );
+    }
+
 
     /**
      * 检查权限
      *
      * @access public
-     * @return void
+     * @param $name
+     * @param $password
+     * @param string $level
+     * @return bool
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      */
     public function checkAccess($name, $password, $level = 'contributor')
     {
-        if ($this->user->login($name, $password, true)) {
-            /** 验证权限 */
-            if ($this->user->pass($level, true)) {
-                $this->user->execute();
-                return true;
-            } else {
-                $this->error = new IXR_Error(403, _t('权限不足'));
+        /** 判断密码是明文还是MD5(32) */
+        if (preg_match("/^[a-f0-9]{32}$/", $password)) {
+            $user = $this->db->fetchRow($this->db->select()
+                ->from('table.users')
+                ->where((strpos($name, '@') ? 'mail' : 'name') . ' = ?', $name)
+                ->limit(1));
+
+            if (empty($user)) {
                 return false;
             }
+
+            if (hash_equals($password, md5($user['password']))) {
+                /** 验证权限 */
+                if (array_key_exists($level, $this->user->groups) && $this->user->groups[$this->user->group] <= $this->user->groups[$level]) {
+                    /** 设置登录 */
+                    $this->user->simpleLogin($user['uid']);
+                    /** 更新最后活动时间  */
+                    $this->db->query($this->db
+                        ->update('table.users')
+                        ->rows(array('activated' => Typecho_Widget::widget('Widget_Options')->time))
+                        ->where('uid = ?', $user['uid']));
+                    return true;
+                } else {
+                    $this->error = new IXR_Error(403, _t('权限不足'));
+                    return false;
+                }
+
+            } else {
+                $this->error = new IXR_Error(403, _t('无法登陆, 密码错误'));
+                return false;
+            }
+
         } else {
-            $this->error = new IXR_Error(403, _t('无法登陆, 密码错误'));
-            return false;
+            if ($this->user->login($name, $password, true)) {
+                /** 验证权限 */
+                if ($this->user->pass($level, true)) {
+                    $this->user->execute();
+                    return true;
+                } else {
+                    $this->error = new IXR_Error(403, _t('权限不足'));
+                    return false;
+                }
+            } else {
+                $this->error = new IXR_Error(403, _t('无法登陆, 密码错误'));
+                return false;
+            }
         }
+
     }
 
     /**
-     * 获取pageId指定的page
-     * about wp xmlrpc api, you can see http://codex.wordpress.org/XML-RPC
+     * 获取用户
      *
-     * @param int $blogId
-     * @param int $pageId
-     * @param string $userName
-     * @param string $password
      * @access public
-     * @return struct $pageStruct
+     * @param $blogId
+     * @param $userName
+     * @param $password
+     * @return array|IXR_Error
+     * @throws Typecho_Widget_Exception
+     * @throws Typecho_Exception
+     * @noinspection PhpUndefinedFieldInspection
      */
-    public function wpGetPage($blogId, $pageId, $userName, $password)
+    public function GetUser($blogId, $userName, $password)
     {
-        /** 检查权限 */
-        if (!$this->checkAccess($userName, $password)) {
+
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
 
-        /** 获取页面 */
-        try {
-            /** 由于Widget_Contents_Page_Edit是从request中获取参数, 因此我们需要强行设置flush一下request */
-            /** widget方法的第三个参数可以指定强行转换传入此widget的request参数 */
-            /** 此组件会进行复杂的权限检测 */
-            $page = $this->singletonWidget('Widget_Contents_Page_Edit', NULL, "cid={$pageId}");
-        } catch (Typecho_Widget_Exception $e) {
-            /** 截获可能会抛出的异常(参见 Widget_Contents_Page_Edit 的 execute 方法) */
-            return new IXR_Error($e->getCode(), $e->getMessage());
-        }
-
-        /** 对文章内容做截取处理，以获得description和text_more*/
-        list($excerpt, $more) = $this->getPostExtended($page);
-
-        $pageStruct = array(
-            'dateCreated'   => new IXR_Date($this->options->timezone + $page->created),
-            'userid'        => $page->authorId,
-            'page_id'       => $page->cid,
-            'page_status'   => $this->typechoToWordpressStatus($page->status, 'page'),
-            'description'   => $excerpt,
-            'title'         => $page->title,
-            'link'          => $page->permalink,
-            'permaLink'     => $page->permalink,
-            'categories'    => $page->categories,
-            'excerpt'       => $page->description,
-            'text_more'     => $more,
-            'mt_allow_comments' => intval($page->allowComment),
-            'mt_allow_pings'    => intval($page->allowPing),
-            'wp_slug'       => $page->slug,
-            'wp_password'   => $page->password,
-            'wp_author'     => $page->author->name,
-            'wp_page_parent_id' => '0',
-            'wp_page_parent_title' => '',
-            'wp_page_order' => $page->order,     //meta是描述字段, 在page时表示顺序
-            'wp_author_id'  => $page->authorId,
-            'wp_author_display_name' => $page->author->screenName,
-            'date_created_gmt'  => new IXR_Date($page->created),
-            'custom_fields'     => array(),
-            'wp_page_template'  =>  $page->template
+        $struct = array(
+            'uid' => $this->user->uid,
+            'name' => $this->user->name,
+            'mail' => $this->user->mail,
+            'screenName' => $this->user->screenName,
+            'url' => $this->user->url,
+            'created' => $this->user->created,
+            'activated' => $this->user->activated,
+            'logged' => $this->user->logged,
+            'group' => $this->user->group,
+            'authCode' => $this->user->authCode
         );
 
-        return $pageStruct;
+        return array(true, $struct);
     }
 
     /**
-     * 获取所有的page
-     *
-     * @param int $blogId
-     * @param string $userName
-     * @param string $password
-     * @access public
-     * @return array(contains $pageStruct)
+     * markdown
+     * @param $text
+     * @return false|string
      */
-    public function wpGetPages($blogId, $userName, $password)
+    public function commonParseMarkdown($text)
     {
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
+        /** 处理Markdown **/
+        $isMarkdown = (0 === strpos($text, '<!--markdown-->'));
+        return $isMarkdown ? substr($text, 15) : $text;
+    }
+
+    /**
+     * 获取内容摘要
+     * @param String $markdown
+     * @return string
+     */
+    public function commonParseDescription($markdown)
+    {
+        /**  获取文章内容摘要 **/
+        try {
+            $description = strip_tags($this->singletonWidget('Widget_Abstract_Contents')->markdown($markdown));
+            return Typecho_Common::subStr($description, 0, 100, "...");
+        } catch (Typecho_Exception $e) {
+            return "";
         }
+    }
 
-        /** 过滤type为page的contents */
-        /** 同样需要flush一下, 需要取出所有status的页面 */
-        $pages = $this->singletonWidget('Widget_Contents_Page_Admin', NULL, 'status=all');
+    /**
+     * 统一解析笔记
+     * @param array $content
+     * @param array $struct
+     * @return array
+     * @throws Typecho_Exception
+     */
+    public function commonNoteStruct($content, $struct)
+    {
 
-        /** 初始化要返回的数据结构 */
-        $pageStructs = array();
+        $markdown = $this->commonParseMarkdown($content['text']);
+        $text = $content['type'] == "post_draft" || isset($struct['text']) ? $markdown : "";
+        $description = isset($struct['description']) ? $this->commonParseDescription($markdown) : "";
+        $filter = $this->singletonWidget('Widget_Abstract_Contents')->filter($content);
 
-        while ($pages->next()) {
-            /** 对文章内容做截取处理，以获得description和text_more*/
-            list($excerpt, $more) = $this->getPostExtended($pages);
-            $pageStructs[] = array(
-                'dateCreated'            => new IXR_Date($this->options->timezone + $pages->created),
-                'userid'                 => $pages->authorId,
-                'page_id'                => intval($pages->cid),
-                /** todo:此处有疑问 */
-                'page_status'            => $this->typechoToWordpressStatus($pages->status, 'page'),
-                'description'            => $excerpt,
-                'title'                  => $pages->title,
-                'link'                   => $pages->permalink,
-                'permaLink'              => $pages->permalink,
-                'categories'             => $pages->categories,
-                'excerpt'                => $pages->description,
-                'text_more'              => $more,
-                'mt_allow_comments'      => intval($pages->allowComment),
-                'mt_allow_pings'         => intval($pages->allowPing),
-                'wp_slug'                => $pages->slug,
-                'wp_password'            => $pages->password,
-                'wp_author'              => $pages->author->name,
-                'wp_page_parent_id'      => 0,
-                'wp_page_parent_title'   => '',
-                'wp_page_order'          => intval($pages->order),     //meta是描述字段, 在page时表示顺序
-                'wp_author_id'           => $pages->authorId,
-                'wp_author_display_name' => $pages->author->screenName,
-                'date_created_gmt'       => new IXR_Date($pages->created),
-                'custom_fields'          => array(),
-                'wp_page_template'       =>  $pages->template
+        return array(
+            'cid' => $content["cid"],
+            'title' => $content['title'],
+            'slug' => $content['slug'],
+            'created' => $content['created'],
+            'modified' => $content['modified'],
+            'text' => $text,
+            'order' => $content['order'],
+            'authorId' => $content['authorId'],
+            'template' => $content['template'],
+            'type' => $content['type'],
+            'status' => $content['status'],
+            'password' => $content['password'],
+            'commentsNum' => $content['commentsNum'],
+            'allowComment' => $content['allowComment'],
+            'allowPing' => $content['allowPing'],
+            'allowFeed' => $content['allowFeed'],
+            'parent' => $content['parent'],
+
+            'permalink' => $filter['permalink'],
+            'description' => $description,
+            'fields' => $this->commonFields($content["cid"]),
+            'categories' => $this->commonMetasNames($content['cid'], true),
+            'tags' => $this->commonMetasNames($content['cid'], false),
+        );
+    }
+
+    /**
+     * 获取分类和标签的字符串
+     * @param int $cid
+     * @param boolean $isCategory
+     * @return string
+     */
+    public function commonMetasNames($cid, $isCategory)
+    {
+        $relationships = $this->db->fetchAll($this->db->select()->from('table.relationships')
+            ->where('cid = ?', $cid));
+        $meta = array();
+        $type = $isCategory ? "category" : "tag";
+        foreach ($relationships as $id) {
+            $metas = $this->db->fetchAll($this->db->select()->from('table.metas')
+                ->where('mid = ?', $id['mid']));
+            foreach ($metas as $row) {
+                if ($row['type'] == $type) {
+                    $meta[] = $row['name'];
+                }
+            }
+        }
+        return implode(",", $meta);
+    }
+
+    /**
+     * 统计文字字数
+     * @param $from
+     * @param $type
+     * @return int
+     */
+    public function GetCharacters($from, $type)
+    {
+        $chars = 0;
+        $select = $this->db->select('text')
+            ->from($from)
+            ->where('type = ?', $type);
+        $rows = $this->db->fetchAll($select);
+        foreach ($rows as $row) {
+            $chars += mb_strlen($row['text'], 'UTF-8');
+        }
+        return $chars;
+    }
+
+    /**
+     * 获取附件
+     * @param $cid
+     * @return false|string
+     */
+    public function commonFields($cid)
+    {
+        $fields = array();
+        $rows = $this->db->fetchAll($this->db->select()->from('table.fields')
+            ->where('cid = ?', $cid));
+        foreach ($rows as $row) {
+            $fields[] = array(
+                "name" => $row['name'],
+                "type" => $row['type'],
+                "value" => $row[$row['type'] . '_value']
             );
         }
+        return json_encode($fields);
+    }
 
-        return $pageStructs;
+
+    /**
+     * 统一评论
+     * @param $comments
+     * @param $struct
+     * @return array
+     */
+    public function commonCommentsStruct($comments, $struct)
+    {
+        return array(
+            'coid' => $comments['coid'],
+            'cid' => $comments['cid'],
+            'created' => $comments['created'],
+            'author' => $comments['author'],
+            'authorId' => $comments['authorId'],
+            'ownerId' => $comments['ownerId'],
+            'mail' => $comments['mail'],
+            'url' => $comments['url'],
+            'ip' => $comments['ip'],
+            'agent' => $comments['agent'],
+            'text' => $comments['text'],
+            'type' => $comments['type'],
+            'status' => $comments['status'],
+            'parent' => $comments['parent'],
+
+            'permalink' => "",
+            'title' => $comments['title'],
+        );
     }
 
     /**
-     * 撰写一个新page
+     * 常用统计
      *
      * @param int $blogId
      * @param string $userName
      * @param string $password
-     * @param struct $content
-     * @param bool $publish
+     * @return array|IXR_Error
+     * @throws Typecho_Widget_Exception
+     * @throws Typecho_Exception
      * @access public
-     * @return void
      */
-    public function wpNewPage($blogId, $userName, $password, $content, $publish)
+    public function GetStat($blogId, $userName, $password)
     {
-        if (!$this->checkAccess($userName, $password, 'editor')) {
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
-        $content['post_type'] = 'page';
-        $this->mwNewPost($blogId, $userName, $password, $content, $publish);
+        $statArray = array(
+            "post" => array(
+                "all" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'post')
+                    ->where('authorId = ?', $blogId))->num,
+                "publish" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'post')
+                    ->where('table.contents.status = ?', 'publish')
+                    ->where('authorId = ?', $blogId))->num,
+                "waiting" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ? OR table.contents.type = ?', 'post', 'post_draft')
+                    ->where('table.contents.status = ?', 'waiting')
+                    ->where('authorId = ?', $blogId))->num,
+                "draft" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'post_draft')
+                    ->where('authorId = ?', $blogId))->num,
+                "hidden" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'post')
+                    ->where('table.contents.status = ?', 'hidden')
+                    ->where('authorId = ?', $blogId))->num,
+                "private" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'post')
+                    ->where('table.contents.status = ?', 'private')
+                    ->where('authorId = ?', $blogId))->num,
+                "textSize" => $this->GetCharacters("table.contents", "post")
+            ),
+            "page" => array(
+                "all" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'page')
+                    ->where('authorId = ?', $blogId))->num,
+                "publish" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'page')
+                    ->where('table.contents.status = ?', 'publish')
+                    ->where('authorId = ?', $blogId))->num,
+                "hidden" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'page')
+                    ->where('table.contents.status = ?', 'hidden')
+                    ->where('authorId = ?', $blogId))->num,
+                "draft" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'page_draft')
+                    ->where('authorId = ?', $blogId))->num,
+                "textSize" => $this->GetCharacters("table.contents", "page")
+            ),
+            "comment" => array(
+                "all" => $this->db->fetchObject($this->db->select(array('COUNT(coid)' => 'num'))
+                    ->from('table.comments'))->num,
+                "me" => $this->db->fetchObject($this->db->select(array('COUNT(coid)' => 'num'))
+                    ->from('table.comments')
+                    ->where('table.comments.authorId = ?', $blogId))->num,
+                "publish" => $this->db->fetchObject($this->db->select(array('COUNT(coid)' => 'num'))
+                    ->from('table.comments')
+                    ->where('table.comments.status = ?', 'approved'))->num,
+                "waiting" => $this->db->fetchObject($this->db->select(array('COUNT(coid)' => 'num'))
+                    ->from('table.comments')
+                    ->where('table.comments.status = ?', 'waiting'))->num,
+                "spam" => $this->db->fetchObject($this->db->select(array('COUNT(coid)' => 'num'))
+                    ->from('table.comments')
+                    ->where('table.comments.status = ?', 'spam'))->num,
+                "textSize" => $this->GetCharacters("table.comments", "comment")
+            ),
+            "categories" => array(
+                "all" => $this->db->fetchObject($this->db->select(array('COUNT(mid)' => 'num'))
+                    ->from('table.metas')
+                    ->where('table.metas.type = ?', 'category'))->num,
+                "archive" => $this->db->fetchObject($this->db->select(array('COUNT(mid)' => 'num'))
+                    ->from('table.metas')
+                    ->where('table.metas.type = ?', 'category')
+                    ->where('table.metas.count != ?', '0'))->num
+            ),
+            "tags" => array(
+                "all" => $this->db->fetchObject($this->db->select(array('COUNT(mid)' => 'num'))
+                    ->from('table.metas')
+                    ->where('table.metas.type = ?', 'tag'))->num,
+                "archive" => $this->db->fetchObject($this->db->select(array('COUNT(mid)' => 'num'))
+                    ->from('table.metas')
+                    ->where('table.metas.type = ?', 'tag')
+                    ->where('table.metas.count != ?', '0'))->num
+            ),
+            "medias" => array(
+                "all" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'attachment'))->num,
+                "archive" => $this->db->fetchObject($this->db->select(array('COUNT(cid)' => 'num'))
+                    ->from('table.contents')
+                    ->where('table.contents.type = ?', 'attachment')
+                    ->where('table.contents.parent != ?', '0'))->num
+            )
+        );
+
+        return array(true, $statArray);
     }
 
     /**
-     * 删除pageId指定的page
+     * 获取指定id的post
      *
-     * @param int $blogId
-     * @param string $userName
-     * @param string $password
-     * @param int $pageId
-     * @access public
-     * @return bool
-     */
-    public function wpDeletePage($blogId, $userName, $password, $pageId)
-    {
-        if (!$this->checkAccess($userName, $password, 'editor')) {
-            return $this->error;
-        }
-
-        /** 删除页面 */
-        try {
-            /** 此组件会进行复杂的权限检测 */
-            $this->singletonWidget('Widget_Contents_Page_Edit', NULL, "cid={$pageId}", false)->deletePage();
-        } catch (Typecho_Widget_Exception $e) {
-            /** 截获可能会抛出的异常(参见 Widget_Contents_Page_Edit 的 execute 方法) */
-            return new IXR_Error($e->getCode(), $e->getMessage());
-        }
-
-        return true;
-    }
-
-    /**
-     * 编辑pageId指定的page
-     *
-     * @param int $blogId
-     * @param int $pageId
-     * @param string $userName
-     * @param string $password
-     * @param struct $content
-     * @param bool $publish
-     * @access public
-     * @return bool
-     */
-    public function wpEditPage($blogId, $pageId, $userName, $password, $content, $publish)
-    {
-        $content['type'] = 'page';
-        $this->mwEditPost($blogId, $pageId, $userName, $password, $content, $publish);
-    }
-
-
-    /**
-     * 编辑postId指定的post 
-     *
-     * @param int $blogId
+     * @param $blogId
      * @param string $userName
      * @param string $password
      * @param int $postId
-     * @param struct $content
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return bool
      */
-    public function wpEditPost($blogId, $userName, $password, $postId, $content)
+    public function GetPost($blogId, $userName, $password, $postId, $struct)
     {
-
-        $post = $this->singletonWidget('Widget_Archive', 'type=single', 'cid=' . $postId, false);
-        if ($post->type == 'attachment') {
-            $attachment['title'] = $content['post_title'];
-            $attachment['slug'] = $content['post_excerpt'];
-
-            $text = unserialize($post->text);
-            $text['description'] = $content['description'];
-
-            $attachment['text'] = serialize($text);
-
-            /** 更新数据 */
-            $updateRows = $this->update($attachment, $this->db->sql()->where('cid = ?', $postId));
-            return true;
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
         }
-        return $this->mwEditPost($blogId, $postId, $userName, $password, $content);
+
+        $select = $this->db->select()->from('table.contents');
+        $select->where('table.contents.authorId = ?', $blogId);
+        $select->where('table.contents.cid = ?', $postId);
+
+        $fetchAll = $this->db->fetchAll($select);
+        if (empty($fetchAll)) {
+            return new IXR_Error(403, "不存在此文章");
+        } else {
+            return array(true, $this->commonNoteStruct($fetchAll[0], $struct));
+        }
+
     }
 
     /**
-     * 获取page列表，没有wpGetPages获得的详细
+     * 获取指定id的page
+     *
+     * @param $blogId
+     * @param string $userName
+     * @param string $password
+     * @param int $postId
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     * @access public
+     */
+    public function GetPage($blogId, $userName, $password, $postId, $struct)
+    {
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+        return $this->GetPost($blogId, $userName, $password, $postId, $struct);
+    }
+
+    /**
+     * 获取文章
      *
      * @param int $blogId
      * @param string $userName
      * @param string $password
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return array
      */
-    public function wpGetPageList($blogId, $userName, $password)
+    public function GetPosts($blogId, $userName, $password, $struct)
     {
-        if (!$this->checkAccess($userName, $password, 'editor')) {
-            return ($this->error);
-        }
-        $pages = $this->singletonWidget('Widget_Contents_Page_Admin', NULL, 'status=all');
-        /**初始化*/
-        $pageStructs = array();
-
-        while ($pages->next()) {
-            $pageStructs[] = array(
-                'dateCreated'       => new IXR_Date($this->options->timezone + $pages->created),
-                'date_created_gmt'  => new IXR_Date($this->options->timezone + $pages->created),
-                'page_id'           => $pages->cid,
-                'page_title'        => $pages->title,
-                'page_parent_id'    => '0',
-            );
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
         }
 
-        return $pageStructs;
-    }
+        $status = empty($struct['status']) ? "all" : $struct['status'];
+        $type = isset($struct['type']) && 'page' == $struct['type'] ? 'page' : 'post';
 
-    /**
-     * 获得一个由blog所有作者的信息组成的数组
-     *
-     * @param int $blogId
-     * @param string $userName
-     * @param string $password
-     * @access public
-     * @return struct
-     */
-    public function wpGetAuthors($blogId, $userName, $password)
-    {
-        if (!$this->checkAccess($userName, $password, 'editor')) {
-            return ($this->error);
+        $select = $this->db->select()->from('table.contents');
+        $select->where('table.contents.authorId = ?', $blogId);
+
+        switch ($status) {
+            case "draft":
+                $select->where('table.contents.type = ?', $type . '_draft');
+                break;
+            case "all":
+                $select->where('table.contents.type = ?', $type);
+                break;
+            default:
+                $select->where('table.contents.type = ?', $type);
+                $select->where('table.contents.status = ?', $status);
         }
 
-        /** 构建查询*/
-        $select = $this->db->select('table.users.uid', 'table.users.name', 'table.users.screenName')->from('table.users');
-        $authors = $this->db->fetchAll($select);
-
-        $authorStructs = array();
-        foreach ($authors as $author) {
-            $authorStructs[] = array(
-                'user_id'       => $author['uid'],
-                'user_login'    => $author['name'],
-                'display_name'  => $author['screenName']
-            );
+        if (!empty($struct['keywords'])) {
+            $select->where('table.contents.title LIKE ?', '%' . $struct['keywords'] . '%');
         }
 
-        return $authorStructs;
-    }
+        $pageSize = empty($struct['number']) ? 10 : abs(intval($struct['number']));
+        $currentPage = empty($struct['offset']) ? 1 : ceil(abs(intval($struct['offset'])) / $pageSize);
 
-    /**
-     * 添加一个新的分类
-     *
-     * @param int $blogId
-     * @param string $userName
-     * @param string $password
-     * @param struct $category
-     * @access public
-     * @return void
-     */
-    public function wpNewCategory($blogId, $userName, $password, $category)
-    {
-        if (!$this->checkAccess($userName, $password)) {
-            return ($this->error);
-        }
+        $select->order('table.contents.created', Typecho_Db::SORT_DESC)
+            ->page($currentPage, $pageSize);
 
-        /** 开始接受数据 */
-        $input['name'] = $category['name'];
-        $input['slug'] = Typecho_Common::slugName(empty($category['slug']) ? $category['name'] : $category['slug']);
-        $input['parent'] = isset($category['parent_id']) ? $category['parent_id'] :
-            (isset($category['parent']) ? $category['parent'] : 0);
-        $input['description'] = isset($category['description']) ? $category['description'] : $category['name'];
-        $input['do'] = 'insert';
-
-        /** 调用已有组件 */
         try {
-            /** 插入 */
-             $categoryWidget = $this->singletonWidget('Widget_Metas_Category_Edit', NULL, $input, false);
-             $categoryWidget->action();
-             return $categoryWidget->mid;
+            $fetchAll = $this->db->fetchAll($select);
+            $postStruct = array();
+
+            foreach ($fetchAll as $row) {
+                $postStruct[] = $this->commonNoteStruct($row, $struct);
+            }
+            return array(true, $postStruct);
+
         } catch (Typecho_Widget_Exception $e) {
             return new IXR_Error($e->getCode(), $e->getMessage());
         }
 
-        return new IXR_Error(403, _t('无法添加分类'));
     }
 
     /**
-     * 获取由给定的string开头的链接组成的数组
+     * 获取独立页面
      *
      * @param int $blogId
      * @param string $userName
      * @param string $password
-     * @param string $category
-     * @param int $max_results
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return array
      */
-    public function wpSuggestCategories($blogId, $userName, $password, $category, $max_results)
+    public function GetPages($blogId, $userName, $password, $struct)
     {
-        if (!$this->checkAccess($userName, $password)) {
-            return ($this->error);
-        }
-
-        $meta = $this->singletonWidget('Widget_Abstract_Metas');
-
-        /** 构造出查询语句并且查询*/
-        $key = Typecho_Common::filterSearchQuery($category);
-        $key = '%' . $key . '%';
-        $select = $meta->select()->where('table.metas.type = ? AND (table.metas.name LIKE ? OR slug LIKE ?)', 'category', $key, $key);
-
-        /** 不要category push到contents的容器中 */
-        $categories = $this->db->fetchAll($select);
-
-        /** 初始化categorise数组*/
-        $categoryStructs = array();
-        foreach ($categories as $category) {
-            $categoryStructs[] = array(
-                'category_id'   => $category['mid'],
-                'category_name' => $category['name'],
-            );
-        }
-
-        return $categoryStructs;
-    }
-    
-    /**
-     * 获取用户
-     * 
-     * @access public
-     * @param string $userName 用户名
-     * @param string $password 密码
-     * @return array
-     */
-    public function wpGetUsersBlogs($userName, $password)
-    {
-
-        if (!$this->checkAccess($userName, $password)) {
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
-
-        $struct = array();
-        $struct[] = array(
-            'isAdmin'   => $this->user->pass('administrator', true),
-            'url'       => $this->options->siteUrl,
-            'blogid'    => '1',
-            'blogName'  => $this->options->title,
-            'xmlrpc'    => $this->options->xmlRpcUrl
-        );
-        return $struct;
-    }
-
-        /**
-     * 获取用户
-     * 
-     * @access public
-     * @param string $userName 用户名
-     * @param string $password 密码
-     * @return array
-     */
-    public function wpGetProfile($blogId, $userName, $password)
-    {
-
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-
-        $struct = array(
-            'user_id'       => $this->user->uid,
-            'username'      => $this->user->name,
-            'first_name'    => '',
-            'last_name'     => '',
-            'registered'    => new IXR_Date($this->options->timezone +  $this->user->created),
-            'bio'           => '',
-            'email'         => $this->user->mail,
-            'nickname'      => $this->user->screenName,
-            'url'           => $this->user->url,
-            'display_name'  => $this->user->screenName,
-            'roles'         => $this->user->group
-        );
-        return $struct;
-    }
-    
-    /**
-     * 获取标签列表
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @return array
-     */
-    public function wpGetTags($blogId, $userName, $password)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        $struct = array();
-        $tags = $this->singletonWidget('Widget_Metas_Tag_Cloud');
-        
-        while ($tags->next()) {
-            $struct[] = array(
-                'tag_id'    =>  $tags->mid,
-                'name'      =>  $tags->name,
-                'count'     =>  $tags->count,
-                'slug'      =>  $tags->slug,
-                'html_url'  =>  $tags->permalink,
-                'rss_url'   =>  $tags->feedUrl
-            );
-        }
-        
-        return $struct;
-    }
-    
-    /**
-     * 删除分类
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param integer $categoryId
-     * @return array
-     */
-    public function wpDeleteCategory($blogId, $userName, $password, $categoryId)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password, 'editor')) {
-            return $this->error;
-        }
-        
-        try {
-            $this->singletonWidget('Widget_Metas_Category_Edit', NULL, 'do=delete&mid=' . intval($categoryId), false);
-            return true;
-        } catch (Typecho_Exception $e) {
-            return false;
-        }
-    }
-    
-    /**
-     * 获取评论数目
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param integer $postId
-     * @return array
-     */
-    public function wpGetCommentCount($blogId, $userName, $password, $postId)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        $stat = $this->singletonWidget('Widget_Stat', NULL, 'cid=' . intval($postId), false);
-        
-        return array(
-            'approved' => $stat->currentPublishedCommentsNum,
-            'awaiting_moderation' => $stat->currentWaitingCommentsNum,
-            'spam' => $stat->currentSpamCommentsNum,
-            'total_comments' => $stat->currentCommentsNum
-        );
-    }
-
-    
-    /**
-     * 获取文章类型列表
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @return array
-     */
-    public function wpGetPostFormats($blogId, $userName, $password)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        return array(
-            'standard' => _t('标准')
-        );
-    }
-    
-    /**
-     * 获取文章状态列表
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @return array
-     */
-    public function wpGetPostStatusList($blogId, $userName, $password)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        return array(
-            'draft'     =>  _t('草稿'),
-            'pending'   =>  _t('待审核'),
-            'publish'   =>  _t('已发布')
-        );
-    }
-    
-    /**
-     * 获取页面状态列表
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @return array
-     */
-    public function wpGetPageStatusList($blogId, $userName, $password)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password, 'editor')) {
-            return $this->error;
-        }
-        
-        return array(
-            'draft'     =>  _t('草稿'),
-            'publish'   =>  _t('已发布')
-        );
-    }
-
-
-    
-    /**
-     * 获取评论状态列表
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @return array
-     */
-    public function wpGetCommentStatusList($blogId, $userName, $password)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        return array(
-            'hold'      =>  _t('待审核'),
-            'approve'   =>  _t('显示'),
-            'spam'      =>  _t('垃圾')
-        );
-    }
-    
-    /**
-     * 获取页面模板
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @return array
-     */
-    public function wpGetPageTemplates($blogId, $userName, $password)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password, 'editor')) {
-            return $this->error;
-        }
-        
-        $templates = array_flip($this->getTemplates());
-        $templates['Default'] = '';
-        
-        return $templates;
-    }
-    
-    /**
-     * 获取系统选项
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param array $options
-     * @return array
-     */
-    public function wpGetOptions($blogId, $userName, $password, $options = array())
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password, 'administrator')) {
-            return $this->error;
-        }
-        
-        $struct = array();
-        if (empty($options)) {
-            $options = array_keys($this->_wpOptions);
-        }
-        
-        foreach ($options as $option) {
-            if (isset($this->_wpOptions[$option])) {
-                $struct[$option] = $this->_wpOptions[$option];
-                if (isset($struct[$option]['option'])) {
-                    $struct[$option]['value'] = $this->options->{$struct[$option]['option']};
-                    unset($struct[$option]['option']);
-                }
-            }
-        }
-        
-        return $struct;
-    }
-    
-    /**
-     * 设置系统选项
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param array $options
-     * @return array
-     */
-    public function wpSetOptions($blogId, $userName, $password, $options = array())
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password, 'administrator')) {
-            return $this->error;
-        }
-        
-        $struct = array();
-        foreach ($options as $option => $value) {
-            if (isset($this->_wpOptions[$option])) {
-                $struct[$option] = $this->_wpOptions[$option];
-                if (isset($struct[$option]['option'])) {
-                    $struct[$option]['value'] = $this->options->{$struct[$option]['option']};
-                    unset($struct[$option]['option']);
-                }
-            
-                if (!$this->_wpOptions[$option]['readonly'] && isset($this->_wpOptions[$option]['option'])) {
-                    if ($this->db->query($this->db->update('table.options')
-                    ->rows(array('value' => $value))
-                    ->where('name = ?', $this->_wpOptions[$option]['option'])) > 0) {
-                        $struct[$option]['value'] = $value;
-                    }
-                }
-            }
-        }
-        
-        return $struct;
-    }
-    
-    /**
-     * 获取评论
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param integer $commentId
-     * @return array
-     */
-    public function wpGetComment($blogId, $userName, $password, $commentId)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        $comment = $this->singletonWidget('Widget_Comments_Edit', NULL, 'do=get&coid=' . intval($commentId), false);
-        
-        if (!$comment->have()) {
-            return new IXR_Error(404, _t('评论不存在'));
-        }
-        
-        if (!$comment->commentIsWriteable()) {
-            return new IXR_Error(403, _t('没有获取评论的权限'));
-        }
-        
-        return array(
-            'date_created_gmt'		=> new IXR_Date($this->options->timezone + $comment->created),
-			'user_id'				=> $comment->authorId,
-			'comment_id'			=> $comment->coid,
-			'parent'				=> $comment->parent,
-			'status'				=> $this->typechoToWordpressStatus($comment->status, 'comment'),
-			'content'				=> $comment->text,
-			'link'					=> $comment->permalink,
-			'post_id'				=> $comment->cid,
-			'post_title'			=> $comment->title,
-			'author'				=> $comment->author,
-			'author_url'			=> $comment->url,
-			'author_email'			=> $comment->mail,
-			'author_ip'				=> $comment->ip,
-			'type'					=> $comment->type
-        );
-    }
-    
-    /**
-     * 获取评论列表
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param array $struct
-     * @return array
-     */
-    public function wpGetComments($blogId, $userName, $password, $struct)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        $input = array();
-        if (!empty($struct['status'])) {
-            $input['status'] = 'hold' == $input['status'] ? $input['status'] : 
-                $this->wordpressToTypechoStatus($struct['status']);
-        } else {
-            $input['__typecho_all_comments'] = 'on';
-        }
-        
-        if (!empty($struct['post_id'])) {
-            $input['cid'] = $struct['post_id'];
-        }
-        
-        $pageSize = 10;
-        if (!empty($struct['number'])) {
-            $pageSize = abs(intval($struct['number']));
-        }
-        
-        if (!empty($struct['offset'])) {
-            $offset = abs(intval($struct['offset']));
-            $input['page'] = ceil($offset / $pageSize);
-        }
-        
-        $comments = $this->singletonWidget('Widget_Comments_Admin', 'pageSize=' . $pageSize, $input, false);
-        $commentsStruct = array();
-        
-        while ($comments->next()) {
-            $commentsStruct[] = array(
-                'date_created_gmt'		=> new IXR_Date($this->options->timezone + $comments->created),
-                'user_id'				=> $comments->authorId,
-                'comment_id'			=> $comments->coid,
-                'parent'				=> $comments->parent,
-                'status'				=> $this->typechoToWordpressStatus($comments->status, 'comment'),
-                'content'				=> $comments->text,
-                'link'					=> $comments->permalink,
-                'post_id'				=> $comments->cid,
-                'post_title'			=> $comments->title,
-                'author'				=> $comments->author,
-                'author_url'			=> $comments->url,
-                'author_email'			=> $comments->mail,
-                'author_ip'				=> $comments->ip,
-                'type'					=> $comments->type
-            );
-        }
-        
-        return $commentsStruct;
-    }
-    
-    /**
-     * 获取评论
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param integer $commentId
-     * @return boolean
-     */
-    public function wpDeleteComment($blogId, $userName, $password, $commentId)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        $commentId = abs(intval($commentId));
-        $commentWidget = $this->singletonWidget('Widget_Abstract_Comments');
-        $where = $this->db->sql()->where('coid = ?', $commentId);
-        
-        if (!$commentWidget->commentIsWriteable($where)) {
-            return new IXR_Error(403, _t('无法编辑此评论'));
-        }
-
-        return intval($this->singletonWidget('Widget_Abstract_Comments')->delete($where)) > 0;
-    }
-    
-    /**
-     * 编辑评论
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param integer $commentId
-     * @param array $struct
-     * @return boolean
-     */
-    public function wpEditComment($blogId, $userName, $password, $commentId, $struct)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        $commentId = abs(intval($commentId));
-        $commentWidget = $this->singletonWidget('Widget_Abstract_Comments');
-        $where = $this->db->sql()->where('coid = ?', $commentId);
-        
-        if (!$commentWidget->commentIsWriteable($where)) {
-            return new IXR_Error(403, _t('无法编辑此评论'));
-        }
-        
-        $input = array();
-        
-        if (isset($struct['date_created_gmt'])) {
-            $input['created'] = $struct['date_created_gmt']->getTimestamp() - $this->options->timezone + $this->options->serverTimezone;
-        }
-        
-        if (isset($struct['status'])) {
-            $input['status'] = $this->wordpressToTypechoStatus($struct['status'], 'comment');
-        }
-        
-        if (isset($struct['content'])) {
-            $input['text'] = $struct['content'];
-        }
-        
-        if (isset($struct['author'])) {
-            $input['author'] = $struct['author'];
-        }
-        
-        if (isset($struct['author_url'])) {
-            $input['url'] = $struct['author_url'];
-        }
-        
-        if (isset($struct['author_email'])) {
-            $input['mail'] = $struct['author_email'];
-        }
-        
-        $result = $commentWidget->update((array) $input, $where);
-        
-        if (!$result) {
-            return new IXR_Error(404, _t('评论不存在'));
-        }
-        
-        return true;
-    }
-    
-    /**
-     * 更新评论
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param mixed $path
-     * @param array $struct
-     * @return int
-     */
-    public function wpNewComment($blogId, $userName, $password, $path, $struct)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        if (is_numeric($path)) {
-            $post = $this->singletonWidget('Widget_Archive', 'type=single', 'cid=' . $path, false);
-        } else {
-            /** 检查目标地址是否正确*/
-            $pathInfo = Typecho_Common::url(substr($path, strlen($this->options->index)), '/');
-            $post = Typecho_Router::match($pathInfo);
-        }
-        
-        /** 这样可以得到cid或者slug*/
-        if (!isset($post) || !($post instanceof Widget_Archive) || !$post->have() || !$post->is('single')) {
-            return new IXR_Error(404, _t('这个目标地址不存在'));
-        }
-        
-        $input = array();
-        $input['permalink'] = $post->pathinfo;
-        $input['type']  = 'comment';
-        
-        if (isset($struct['comment_author'])) {
-            $input['author'] = $struct['author'];
-        }
-        
-        if (isset($struct['comment_author_email'])) {
-            $input['mail'] = $struct['author_email'];
-        }
-        
-        if (isset($struct['comment_author_url'])) {
-            $input['url'] = $struct['author_url'];
-        }
-        
-        if (isset($struct['comment_parent'])) {
-            $input['parent'] = $struct['comment_parent'];
-        }
-        
-        if (isset($struct['content'])) {
-            $input['text'] = $struct['content'];
-        }
-        
-        try {
-            $commentWidget =  $this->singletonWidget('Widget_Feedback', 'checkReferer=false', $input, false);
-            $commentWidget->action();
-            return intval($commentWidget->coid);
-        } catch (Typecho_Exception $e) {
-            return new IXR_Error(500, $e->getMessage());
-        }
-        
-        return new IXR_Error(403, _t('无法添加评论'));
-    }
-
-
-
-    /**
-     * 获取媒体文件
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param struct $struct
-     * @return boolean
-     */
-    public function wpGetMediaLibrary($blogId, $userName, $password, $struct)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-
-        $input = array();
-
-        if (!empty($struct['parent_id'])) {
-            $input['parent'] = $struct['parent_id'];
-        }
-
-        if (!empty($struct['mime_type'])) {
-            $input['mime'] = $struct['mime_type'];
-        }
-        
-        $pageSize = 10;
-        if (!empty($struct['number'])) {
-            $pageSize = abs(intval($struct['number']));
-        }
-        
-        if (!empty($struct['offset'])) {
-            $input['page'] = abs(intval($struct['offset'])) + 1;
-        }
-        
-        $attachments = $this->singletonWidget('Widget_Contents_Attachment_Admin', 'pageSize=' . $pageSize, $input, false);
-        $attachmentsStruct = array();
-        
-        while ($attachments->next()) {
-            $attachmentsStruct[] = array(
-                'attachment_id'         => $attachments->cid,
-                'date_created_gmt'      => new IXR_Date($this->options->timezone + $attachments->created),
-                'parent'                => $attachments->parent,
-                'link'                  => $attachments->attachment->url,
-                'title'                 => $attachments->title,
-                'caption'               => $attachments->slug,
-                'description'           => $attachments->attachment->description,
-                'metadata'              => array(
-                    'file'  =>  $attachments->attachment->path,
-                    'size'  =>  $attachments->attachment->size,
-                ),
-                'thumbnail'             => $attachments->attachment->url,
-
-            );
-        }
-        return $attachmentsStruct;
+        $struct['type'] = "page";
+        return $this->GetPosts($blogId, $userName, $password, $struct);
     }
 
     /**
-     * 获取媒体文件
-     * 
-     * @access public
-     * @param integer $blogId
-     * @param string $userName
-     * @param string $password
-     * @param int $attachmentId
-     * @return boolean
-     */
-    public function wpGetMediaItem($blogId, $userName, $password, $attachmentId)
-    {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        
-        
-        $attachment = $this->singletonWidget('Widget_Contents_Attachment_Edit', NULL, "cid={$attachmentId}");
-        $struct = array(
-            'attachment_id'         => $attachment->cid,
-            'date_created_gmt'      => new IXR_Date($this->options->timezone + $attachment->created),
-            'parent'                => $attachment->parent,
-            'link'                  => $attachment->attachment->url,
-            'title'                 => $attachment->title,
-            'caption'               => $attachment->slug,
-            'description'           => $attachment->attachment->description,
-            'metadata'              => array(
-                'file'  =>  $attachment->attachment->path,
-                'size'  =>  $attachment->attachment->size,
-            ),
-            'thumbnail'             => $attachment->attachment->url,
-
-        );
-        return $struct;
-    }
-
-
-
-    /**
-     * MetaWeblog API
-     * about MetaWeblog API, you can see http://www.xmlrpc.com/metaWeblogApi
+     * 撰写文章
      *
      * @param int $blogId
      * @param string $userName
      * @param string $password
-     * @param mixed $content
-     * @param bool $publish
+     * @param $content
+     * @return array|IXR_Error|void
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return int
+     * @noinspection PhpUndefinedMethodInspection
+     * @noinspection DuplicatedCode
      */
-    public function mwNewPost($blogId, $userName, $password, $content, $publish)
+    public function NewPost($blogId, $userName, $password, $content)
     {
-        /** 检查权限*/
-        if (!$this->checkAccess($userName, $password)) {
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
 
-        /** 取得content内容 */
         $input = array();
-        $type = isset($content['post_type']) && 'page' == $content['post_type'] ? 'page' : 'post';
-        
+        $type = isset($content['type']) && 'page' == $content['type'] ? 'page' : 'post';
+
         $input['title'] = trim($content['title']) == NULL ? _t('未命名文档') : $content['title'];
 
         if (isset($content['slug'])) {
             $input['slug'] = $content['slug'];
-        } else if (isset($content['wp_slug'])) {
-            //fix issue 338, wlw只发送这个
-            $input['slug'] = $content['wp_slug'];
         }
 
-        $input['text'] = !empty($content['mt_text_more']) ? $content['description'] 
-            . "\n<!--more-->\n" . $content['mt_text_more'] : $content['description'];
-        $input['text'] = $this->pluginHandle()->textFilter($input['text'], $this); 
-        
-        $input['password'] = isset($content["wp_password"]) ? $content["wp_password"] : NULL;
-        $input['order'] = isset($content["wp_page_order"]) ? $content["wp_page_order"] : NULL;
+        $input['text'] = !empty($content['text']) ? $content['text'] : NULL;
+        $input['text'] = $this->pluginHandle()->textFilter($input['text'], $this);
 
-        $input['tags'] = isset($content['mt_keywords']) ? $content['mt_keywords'] : NULL;
+        $input['password'] = isset($content["password"]) ? $content["password"] : NULL;
+        $input['order'] = isset($content["order"]) ? $content["order"] : NULL;
+
+        $input['tags'] = !empty($content['tags']) && is_array($content['tags']) ? implode(',', $content['tags']) : NULL;
         $input['category'] = array();
 
-        if (isset($content['postId'])) {
-            $input['cid'] = $content['postId'];
+        if (isset($content['cid'])) {
+            $input['cid'] = $content['cid'];
         }
-        
-        if ('page' == $type && isset($content['wp_page_template'])) {
-            $input['template'] = $content['wp_page_template'];
+
+        if ('page' == $type && isset($content['template'])) {
+            $input['template'] = $content['template'];
         }
 
         if (isset($content['dateCreated'])) {
@@ -1409,47 +650,49 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
             $input['created'] = $content['dateCreated']->getTimestamp() - $this->options->timezone + $this->options->serverTimezone;
         }
 
+        if (isset($content['fields']) && is_array($content['fields'])) {
+            $input['fields'] = $content['fields'];
+        }
+
         if (!empty($content['categories']) && is_array($content['categories'])) {
             foreach ($content['categories'] as $category) {
                 if (!$this->db->fetchRow($this->db->select('mid')
-                ->from('table.metas')->where('type = ? AND name = ?', 'category', $category))) {
-                    $result = $this->wpNewCategory($blogId, $userName, $password, array('name' => $category));
-                    if (true !== $result) {
-                        return $result;
-                    }
+                    ->from('table.metas')->where('type = ? AND name = ?', 'category', $category))) {
+                    $this->NewCategory($blogId, $userName, $password, array('name' => $category));
                 }
 
                 $input['category'][] = $this->db->fetchObject($this->db->select('mid')
-                ->from('table.metas')->where('type = ? AND name = ?', 'category', $category)
-                ->limit(1))->mid;
+                    ->from('table.metas')->where('type = ? AND name = ?', 'category', $category)
+                    ->limit(1))->mid;
             }
         }
 
-        $input['allowComment'] = (isset($content['mt_allow_comments']) && (1 == $content['mt_allow_comments']
-        || 'open' == $content['mt_allow_comments'])) ? 1 : ((isset($content['mt_allow_comments']) && (0 == $content['mt_allow_comments']
-        || 'closed' == $content['mt_allow_comments'])) ? 0 : $this->options->defaultAllowComment);
+        $input['allowComment'] = (isset($content['allow_comments']) && (1 == $content['allow_comments']
+                || 'open' == $content['allow_comments'])) ? 1 : ((isset($content['allow_comments']) && (0 == $content['allow_comments']
+                || 'closed' == $content['allow_comments'])) ? 0 : $this->options->defaultAllowComment);
 
-        $input['allowPing'] = (isset($content['mt_allow_pings']) && (1 == $content['mt_allow_pings']
-        || 'open' == $content['mt_allow_pings'])) ? 1 : ((isset($content['mt_allow_pings']) && (0 == $content['mt_allow_pings']
-        || 'closed' == $content['mt_allow_pings'])) ? 0 : $this->options->defaultAllowPing);
+        $input['allowPing'] = (isset($content['allow_pings']) && (1 == $content['allow_pings']
+                || 'open' == $content['allow_pings'])) ? 1 : ((isset($content['allow_pings']) && (0 == $content['allow_pings']
+                || 'closed' == $content['allow_pings'])) ? 0 : $this->options->defaultAllowPing);
 
         $input['allowFeed'] = $this->options->defaultAllowFeed;
-        $input['do'] = $publish ? 'publish' : 'save';
+        $input['do'] = $content["publish"] ? 'publish' : 'save';
         $input['markdown'] = $this->options->xmlrpcMarkdown;
-        
+
         /** 调整状态 */
-        if (isset($content["{$type}_status"])) {
-            $status = $this->wordpressToTypechoStatus($content["{$type}_status"], $type);
-            
-            if ('publish' == $status || 'waiting' == $status || 'private' == $status) {
-                $input['do'] = 'publish';
-                
-                if ('private' == $status) {
-                    $input['private'] = 1;
-                }
-            } else {
-                $input['do'] = 'save';
+        if (isset($content["status"])) {
+            $status = $content["status"];
+        } else {
+            $status = "publish";
+        }
+        $input['visibility'] = isset($content["visibility"]) ? $content["visibility"] : $status;
+        if ('publish' == $status || 'waiting' == $status || 'private' == $status || 'hidden' == $status) {
+            $input['do'] = 'publish';
+            if ('private' == $status) {
+                $input['private'] = 1;
             }
+        } else {
+            $input['do'] = 'save';
         }
 
         /** 对未归档附件进行归档 */
@@ -1462,7 +705,6 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
                     if (!isset($input['attachment'])) {
                         $input['attachment'] = array();
                     }
-
                     $input['attachment'][] = $attach['cid'];
                 }
             }
@@ -1476,146 +718,452 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
             } else {
                 $this->singletonWidget('Widget_Contents_Post_Edit', NULL, $input, false)->action();
             }
-        
-            return $this->singletonWidget('Widget_Notice')->getHighlightId();
+            return array(true, $this->singletonWidget('Widget_Notice')->getHighlightId());
         } catch (Typecho_Widget_Exception $e) {
-            return new IXR_Error($e->getCode(), $e->getMessage());
+            return array(false, new IXR_Error($e->getCode(), $e->getMessage()));
         }
     }
 
     /**
-     * 编辑post
+     * 编辑文章
      *
      * @param int $postId
      * @param string $userName
      * @param string $password
-     * @param struct $content
-     * @param bool $publish
+     * @param array $content
+     * @return array|IXR_Error|void
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return int
      */
-    public function mwEditPost($postId, $userName, $password, $content, $publish = true)
+    public function EditPost($postId, $userName, $password, $content)
     {
-        $content['postId'] = $postId;
-        return $this->mwNewPost(1, $userName, $password, $content, $publish);
+        return $this->NewPost($postId, $userName, $password, $content);
     }
 
     /**
-     * 获取指定id的post
-     *
-     * @param int $postId
-     * @param string $userName
-     * @param string $password
+     * 删除文章
+     * @param mixed $blogId
+     * @param mixed $userName
+     * @param mixed $password
+     * @param $postId
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return void
      */
-    public function mwGetPost($postId, $userName, $password)
+    public function DeletePost($blogId, $userName, $password, $postId)
     {
-        if (!$this->checkAccess($userName, $password)) {
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
 
         try {
-            $post = $this->singletonWidget('Widget_Contents_Post_Edit', NULL, "cid={$postId}");
+            $this->singletonWidget('Widget_Contents_Post_Edit', NULL, "cid={$postId}", false)->deletePost();
+            return array(true, null);
         } catch (Typecho_Widget_Exception $e) {
             return new IXR_Error($e->getCode(), $e->getMessage());
         }
-
-        /** 对文章内容做截取处理，以获得description和text_more*/
-        list($excerpt, $more) = $this->getPostExtended($post);
-        /** 只需要分类的name*/
-        $categories = Typecho_Common::arrayFlatten($post->categories, 'name');
-        $tags = Typecho_Common::arrayFlatten($post->tags, 'name');
-
-        $postStruct = array(
-                'dateCreated'   => new IXR_Date($this->options->timezone + $post->created),
-                'userid'        => $post->authorId,
-                'postid'       => $post->cid,
-                'description'   => $excerpt,
-                'title'         => $post->title,
-                'link'          => $post->permalink,
-                'permaLink'     => $post->permalink,
-                'categories'    => $categories,
-                'mt_excerpt'    => $post->description,
-                'mt_text_more'  => $more,
-                'mt_allow_comments' => intval($post->allowComment),
-                'mt_allow_pings'    => intval($post->allowPing),
-                'mt_keywords'	=> implode(', ', $tags),
-                'wp_slug'       => $post->slug,
-                'wp_password'   => $post->password,
-                'wp_author'     => $post->author->name,
-                'wp_author_id'  => $post->authorId,
-                'wp_author_display_name' => $post->author->screenName,
-                'date_created_gmt'  =>  new IXR_Date($post->created),
-                'post_status'   => $this->typechoToWordpressStatus($post->status, 'post'),
-                'custom_fields' => array(),
-                'sticky'        => 0
-        );
-        
-        return $postStruct;
     }
 
     /**
-     * 获取前$postsNum个post
+     * 获取评论
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param array $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function GetComments($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+
+        $select = $this->db->select('table.comments.coid',
+            'table.comments.cid',
+            'table.comments.created',
+            'table.comments.author',
+            'table.comments.authorId',
+            'table.comments.ownerId',
+            'table.comments.mail',
+            'table.comments.url',
+            'table.comments.ip',
+            'table.comments.agent',
+            'table.comments.text',
+            'table.comments.type',
+            'table.comments.status',
+            'table.comments.parent',
+            'table.contents.title'
+        )->from('table.comments')->join('table.contents', 'table.comments.cid = table.contents.cid', Typecho_Db::LEFT_JOIN);
+        $select->where('table.comments.ownerId = ?', $blogId);
+
+        if (!empty($struct['cid'])) {
+            $select->where('table.comments.cid = ?', $struct['cid']);
+        }
+
+        if (!empty($struct['mail'])) {
+            $select->where('table.comments.mail = ?', $struct['mail']);
+        }
+
+        if (!empty($struct['status'])) {
+            $select->where('table.comments.status = ?', $struct['status']);
+        }
+
+        $pageSize = empty($struct['number']) ? 10 : abs(intval($struct['number']));
+        $currentPage = empty($struct['offset']) ? 1 : ceil(abs(intval($struct['offset'])) / $pageSize);
+
+        $select->order('created', Typecho_Db::SORT_DESC)
+            ->page($currentPage, $pageSize);
+
+        try {
+            $fetchAll = $this->db->fetchAll($select);
+            $postStruct = array();
+
+            foreach ($fetchAll as $row) {
+                $postStruct[] = $this->commonCommentsStruct($row, $struct);
+            }
+            return array(true, $postStruct);
+
+        } catch (Typecho_Widget_Exception $e) {
+            return new IXR_Error($e->getCode(), $e->getMessage());
+        }
+    }
+
+    /**
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param array $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function GetAlarmComments($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+        if (empty($struct['lastTime'])) {
+            return new IXR_Error(403, _t('缺少参数'));
+        }
+        if (empty($struct['number'])) {
+            $query = $this->db->select()->from('table.comments')->where('table.comments.authorId != ?', $blogId)->where('created >= ?', intval($struct['lastTime']));
+            $result = $this->db->fetchAll($query);
+        } else {
+            $query = $this->db->select(array('COUNT(coid)' => 'num'))->from('table.comments')->where('table.comments.authorId != ?', $blogId)->where('created >= ?', intval($struct['lastTime']));
+            $result = $this->db->fetchObject($query)->num;
+        }
+        return array(true, $result);
+    }
+
+    /**
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param array $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function GetAlarmMessages($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+        if (empty($struct['lastTime'])) {
+            return new IXR_Error(403, _t('缺少参数'));
+        }
+
+        /** @noinspection PhpUndefinedFieldInspection */
+        if (!isset($this->options->plugins['activated']['Messages'])) {
+            return new IXR_Error(403, "没有启用 messages 插件");
+        }
+
+        if (empty($struct['number'])) {
+            $query = $this->db->select()->from('table.messages')->where('table.messages.authorId = ?', $blogId)->where('created >= ?', intval($struct['lastTime']));
+            $result = $this->db->fetchAll($query);
+        } else {
+            $query = $this->db->select(array('COUNT(mid)' => 'num'))->from('table.messages')->where('table.messages.authorId = ?', $blogId)->where('created >= ?', intval($struct['lastTime']));
+            $result = $this->db->fetchObject($query)->num;
+        }
+        return array(true, $result);
+    }
+
+    /**
+     * 删除评论
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param integer $commentId
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function DeleteComment($blogId, $userName, $password, $commentId)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+
+        $commentId = abs(intval($commentId));
+        $commentWidget = $this->singletonWidget('Widget_Abstract_Comments');
+        $where = $this->db->sql()->where('coid = ?', $commentId);
+
+        if (!$commentWidget->commentIsWriteable($where)) {
+            return new IXR_Error(403, _t('无法编辑此评论'));
+        }
+
+        return array(intval($this->singletonWidget('Widget_Abstract_Comments')->delete($where)) > 0, null);
+    }
+
+    /**
+     * 创建评论
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param mixed $path
+     * @param array $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     * @noinspection PhpUnhandledExceptionInspection
+     */
+    public function NewComment($blogId, $userName, $password, $path, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+
+        if (is_numeric($path)) {
+            $post = $this->singletonWidget('Widget_Archive', 'type=single', 'cid=' . $path, false);
+        } else {
+            /** 检查目标地址是否正确*/
+            $pathInfo = Typecho_Common::url(substr($path, strlen($this->options->index)), '/');
+            $post = Typecho_Router::match($pathInfo);
+        }
+
+        /** 这样可以得到cid或者slug*/
+        if (!isset($post) || !($post instanceof Widget_Archive) || !$post->have() || !$post->is('single')) {
+            return new IXR_Error(404, _t('这个目标地址不存在'));
+        }
+
+        $input = array();
+        $input['permalink'] = $post->pathinfo;
+        $input['type'] = 'comment';
+
+        if (isset($struct['author'])) {
+            $input['author'] = $struct['author'];
+        }
+
+        if (isset($struct['mail'])) {
+            $input['mail'] = $struct['mail'];
+        }
+
+        if (isset($struct['url'])) {
+            $input['url'] = $struct['url'];
+        }
+
+        if (isset($struct['parent'])) {
+            $input['parent'] = $struct['parent'];
+        }
+
+        if (isset($struct['text'])) {
+            $input['text'] = $struct['text'];
+        }
+
+        try {
+            $commentWidget = $this->singletonWidget('Widget_Feedback', 'checkReferer=false', $input, false);
+            $commentWidget->action();
+            return array(true, $commentWidget->coid);
+        } catch (Typecho_Exception $e) {
+            return new IXR_Error(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * 获取评论
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param integer $commentId
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function GetComment($blogId, $userName, $password, $commentId)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+
+        $comments = $this->singletonWidget('Widget_Comments_Edit', NULL, 'do=get&coid=' . intval($commentId), false);
+
+        if (!$comments->have()) {
+            return new IXR_Error(404, _t('评论不存在'));
+        }
+
+        if (!$comments->commentIsWriteable()) {
+            return new IXR_Error(403, _t('没有获取评论的权限'));
+        }
+
+        $commentsStruct = $this->commonCommentsStruct($comments, null);
+
+        return array(true, $commentsStruct);
+    }
+
+    /**
+     * 编辑评论
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param integer $commentId
+     * @param array $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function EditComment($blogId, $userName, $password, $commentId, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+
+        $commentId = abs(intval($commentId));
+        $commentWidget = $this->singletonWidget('Widget_Abstract_Comments');
+        $where = $this->db->sql()->where('coid = ?', $commentId);
+
+        if (!$commentWidget->commentIsWriteable($where)) {
+            return new IXR_Error(403, _t('无法编辑此评论'));
+        }
+
+        $input = array();
+
+        if (isset($struct['created'])) {
+            $input['created'] = $struct['created'];
+        } elseif (isset($struct['created_gmt'])) {
+            $input['created'] = $struct['created_gmt']->getTimestamp() - $this->options->timezone + $this->options->serverTimezone;
+        }
+
+        if (isset($struct['status'])) {
+            $input['status'] = $struct['status'];
+        } else {
+            $input['status'] = "approved";
+        }
+
+        if (isset($struct['text'])) {
+            $input['text'] = $struct['text'];
+        }
+
+        if (isset($struct['author'])) {
+            $input['author'] = $struct['author'];
+        }
+
+        if (isset($struct['url'])) {
+            $input['url'] = $struct['url'];
+        }
+
+        if (isset($struct['mail'])) {
+            $input['mail'] = $struct['mail'];
+        }
+
+        $result = $commentWidget->update((array)$input, $where);
+
+        if (!$result) {
+            return new IXR_Error(404, _t('评论不存在'));
+        }
+
+        return array(true, null);
+    }
+
+    /**
+     * NewMedia
      *
      * @param int $blogId
      * @param string $userName
      * @param string $password
-     * @param int $postsNum
+     * @param mixed $data
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return postStructs
+     * @noinspection PhpUndefinedMethodInspection
      */
-    public function mwGetRecentPosts($blogId, $userName, $password, $postsNum)
+    public function NewMedia($blogId, $userName, $password, $data)
     {
-        if (!$this->checkAccess($userName, $password)) {
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
 
-        $posts = $this->singletonWidget('Widget_Contents_Post_Admin', "pageSize={$postsNum}", 'status=all');
+        $result = Widget_Upload::uploadHandle($data);
 
-        $postStructs = array();
-        /** 如果这个post存在则输出，否则输出错误 */
-        while ($posts->next()) {
-            /** 对文章内容做截取处理，以获得description和text_more*/
-            list($excerpt, $more) = $this->getPostExtended($posts);
+        if (false === $result) {
+            return new IXR_Error(500, _t('上传失败'));
+        } else {
 
-            /** 只需要分类的name*/
-            /** 可以用flatten函数处理 */
-            $categories = Typecho_Common::arrayFlatten($posts->categories, 'name');
-            $tags = Typecho_Common::arrayFlatten($posts->tags, 'name');
+            $insertId = $this->insert(array(
+                'title' => $result['name'],
+                'slug' => $result['name'],
+                'type' => 'attachment',
+                'status' => 'publish',
+                'text' => serialize($result),
+                'allowComment' => 1,
+                'allowPing' => 0,
+                'allowFeed' => 1
+            ));
 
-            $postStructs[] = array(
-                    'dateCreated'            => new IXR_Date($this->options->timezone + $posts->created),
-                    'userid'                 => $posts->authorId,
-                    'postid'                 => $posts->cid,
-                    'description'            => $excerpt,
-                    'title'                  => $posts->title,
-                    'link'                   => $posts->permalink,
-                    'permaLink'              => $posts->permalink,
-                    'categories'             => $categories,
-                    'mt_excerpt'             => $posts->description,
-                    'mt_text_more'           => $more,
-                    'wp_more_text'           => $more,
-                    'mt_allow_comments'      => intval($posts->allowComment),
-                    'mt_allow_pings'         => intval($posts->allowPing),
-                    'mt_keywords'	         => implode(', ', $tags),
-                    'wp_slug'                => $posts->slug,
-                    'wp_password'            => $posts->password,
-                    'wp_author'              => $posts->author->name,
-                    'wp_author_id'           => $posts->authorId,
-                    'wp_author_display_name' => $posts->author->screenName,
-                    'date_created_gmt'       => new IXR_Date($posts->created),
-                    'post_status'            => $this->typechoToWordpressStatus($posts->status, 'post'),
-                    'custom_fields'          => array(),
-                    'wp_post_format'         => 'standard',
-                    'date_modified'          => new IXR_Date($this->options->timezone + $posts->modified),
-                    'date_modified_gmt'      => new IXR_Date($posts->modified),
-                    'wp_post_thumbnail'      => '',
-                    'sticky'                 => 0
+            $this->db->fetchRow($this->select()->where('table.contents.cid = ?', $insertId)
+                ->where('table.contents.type = ?', 'attachment'), array($this, 'push'));
+
+            /** 增加插件接口 */
+            $this->pluginHandle()->upload($this);
+
+            $object = array(
+                'name' => $this->attachment->name,
+                'url' => $this->attachment->url
             );
-        }
 
-        return $postStructs;
+            return array(true, $object);
+        }
+    }
+
+    public function commonCategoryTagStruct($categories, $struct)
+    {
+        return array(
+            'mid' => $categories->mid,
+            'name' => $categories->name,
+            'slug' => $categories->slug,
+            'type' => $categories->type,
+            'description' => $categories->description,
+            'count' => $categories->count,
+            'order' => $categories->order,
+            'parent' => $categories->parent,
+
+            'permalink' => $categories->permalink,
+        );
     }
 
     /**
@@ -1624,13 +1172,15 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
      * @param int $blogId
      * @param string $userName
      * @param string $password
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return categoryStructs
      */
-    public function mwGetCategories($blogId, $userName, $password)
+    public function GetCategories($blogId, $userName, $password)
     {
-        if (!$this->checkAccess($userName, $password)) {
-            return ($this->error);
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
         }
 
         $categories = $this->singletonWidget('Widget_Metas_Category_List');
@@ -1638,409 +1188,895 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
         /** 初始化category数组*/
         $categoryStructs = array();
         while ($categories->next()) {
-            $categoryStructs[] = array(
-                'categoryId'            => $categories->mid,
-                'parentId'              => $categories->parent,
-                'categoryName'          => $categories->name,
-                'categoryDescription'   => $categories->description,
-                'description'           => $categories->name,
-                'htmlUrl'               => $categories->permalink,
-                'rssUrl'                => $categories->feedUrl,
-            );
+            $categoryStructs[] = $this->commonCategoryTagStruct($categories, null);
         }
 
-        return $categoryStructs;
+        return array(true, $categoryStructs);
     }
 
     /**
-     * mwNewMediaObject
+     * 添加一个新的分类
      *
      * @param int $blogId
      * @param string $userName
      * @param string $password
-     * @param mixed $data
+     * @param $category
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return void
      */
-    public function mwNewMediaObject($blogId, $userName, $password, $data)
+    public function NewCategory($blogId, $userName, $password, $category)
     {
-        if (!$this->checkAccess($userName, $password)) {
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
 
-        $result = Widget_Upload::uploadHandle($data);
+        /** 开始接受数据 */
+        $input['name'] = $category['name'];
+        $input['slug'] = Typecho_Common::slugName(empty($category['slug']) ? $category['name'] : $category['slug']);
+        $input['parent'] = isset($category['parent_id']) ? $category['parent_id'] :
+            (isset($category['parent']) ? $category['parent'] : 0);
+        $input['description'] = isset($category['description']) ? $category['description'] : $category['name'];
+        $input['do'] = 'insert';
 
-        if (false === $result) {
-            return IXR_Error(500, _t('上传失败'));
-        } else {
-
-            $insertId = $this->insert(array(
-                'title'     =>  $result['name'],
-                'slug'      =>  $result['name'],
-                'type'      =>  'attachment',
-                'status'    =>  'publish',
-                'text'      =>  serialize($result),
-                'allowComment'      =>  1,
-                'allowPing'         =>  0,
-                'allowFeed'         =>  1
-            ));
-
-            $this->db->fetchRow($this->select()->where('table.contents.cid = ?', $insertId)
-                    ->where('table.contents.type = ?', 'attachment'), array($this, 'push'));
-
-            /** 增加插件接口 */
-            $this->pluginHandle()->upload($this);
-
-            return array(
-                'file' => $this->attachment->name,
-                'url'  => $this->attachment->url
-            );
+        /** 调用已有组件 */
+        try {
+            /** 插入 */
+            $categoryWidget = $this->singletonWidget('Widget_Metas_Category_Edit', NULL, $input, false);
+            $categoryWidget->action();
+            return array(true, $categoryWidget->mid);
+        } catch (Typecho_Widget_Exception $e) {
+            return new IXR_Error($e->getCode(), "无法添加分类");
         }
     }
 
     /**
-     * 获取 $postNum个post title
+     * 编辑分类
      *
      * @param int $blogId
      * @param string $userName
      * @param string $password
-     * @param int $postNum
+     * @param $category
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return postTitleStructs
      */
-    public function mtGetRecentPostTitles($blogId, $userName, $password, $postsNum)
+    public function EditCategory($blogId, $userName, $password, $category)
     {
-        if (!$this->checkAccess($userName, $password)) {
-            return ($this->error);
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
         }
 
-        /** 读取数据*/
-        $posts = $this->singletonWidget('Widget_Contents_Post_Admin', "pageSize=$postsNum", 'status=all');
-
-        /**初始化*/
-        $postTitleStructs = array();
-        while ($posts->next()) {
-            $postTitleStructs[] = array(
-                'dateCreated'       => new IXR_Date($this->options->timezone + $posts->created),
-                'userid'            => $posts->authorId,
-                'postid'            => $posts->cid,
-                'title'             => $posts->title,
-                'date_created_gmt'  => new IXR_Date($this->options->timezone + $posts->created)
-            );
+        if (empty($category['mid'])) {
+            return new IXR_Error(403, "没有设置分类mid");
+        }
+        $input['mid'] = $category['mid'];
+        if (!$this->db->fetchRow($this->db->select('mid')
+            ->from('table.metas')->where('type = ? AND mid = ?', 'category', $input['mid']))) {
+            return new IXR_Error(403, "没有查找到分类");
         }
 
-        return $postTitleStructs;
+        /** 开始接受数据 */
+        $input['name'] = $category['name'];
+        $input['slug'] = Typecho_Common::slugName(empty($category['slug']) ? $category['name'] : $category['slug']);
+        $input['parent'] = isset($category['parent_id']) ? $category['parent_id'] :
+            (isset($category['parent']) ? $category['parent'] : 0);
+        $input['description'] = isset($category['description']) ? $category['description'] : $category['name'];
+        $input['do'] = 'update';
+
+        /** 调用已有组件 */
+        try {
+            /**更新 */
+            $categoryWidget = $this->singletonWidget('Widget_Metas_Category_Edit', NULL, $input, false);
+            $categoryWidget->action();
+            return array(true, null);
+        } catch (Typecho_Widget_Exception $e) {
+            return new IXR_Error($e->getCode(), "无法编辑分类");
+        }
     }
 
     /**
-     * 获取分类列表
+     * 删除分类
      *
-     * @param int $blogId
+     * @access public
+     * @param integer $blogId
      * @param string $userName
      * @param string $password
-     * @access public
-     * @return categories
+     * @param integer $categoryId
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      */
-    public function mtGetCategoryList($blogId, $userName, $password)
+    public function DeleteCategory($blogId, $userName, $password, $categoryId)
     {
-        if (!$this->checkAccess($userName, $password)) {
-            return ($this->error);
-        }
-
-        $categories = $this->singletonWidget('Widget_Metas_Category_List');
-
-        /** 初始化categorise数组*/
-        $categoryStructs = array();
-        while ($categories->next()) {
-            $categoryStructs[] = array(
-                'categoryId'   => $categories->mid,
-                'categoryName' => $categories->name,
-            );
-        }
-        return $categoryStructs;
-    }
-
-    /**
-     * 获取指定post的分类
-     *
-     * @param int $postId
-     * @param string $userName
-     * @param string $password
-     * @access public
-     * @return void
-     */
-    public function mtGetPostCategories($postId, $userName, $password)
-    {
-        if (!$this->checkAccess($userName, $password)) {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, 'administrator')) {
             return $this->error;
         }
 
         try {
-            $post = $this->singletonWidget('Widget_Contents_Post_Edit', NULL, "cid={$postId}");
-        } catch (Typecho_Widget_Exception $e) {
-            return new IXR_Error($e->getCode(), $e->getMessage());
+            $this->singletonWidget('Widget_Metas_Category_Edit', NULL, 'do=delete&mid=' . intval($categoryId), false);
+            return array(true, null);
+        } catch (Typecho_Exception $e) {
+            return new IXR_Error($e->getCode(), "删除分类失败");
         }
-
-        /** 格式化categories*/
-        $categories = array();
-        foreach ($post->categories as $category) {
-            $categories[] = array(
-                'categoryName'      => $category['name'],
-                'categoryId'        => $category['mid'],
-                'isPrimary'         => true
-            );
-        }
-        return $categories;
     }
 
     /**
-     * 修改post的分类
-     *
-     * @param int $postId
-     * @param string $userName
-     * @param string $password
-     * @param string $categories
-     * @access public
-     * @return bool
-     */
-    public function mtSetPostCategories($postId, $userName, $password, $categories)
-    {
-        if (!$this->checkAccess($userName, $password, 'editor')) {
-            return $this->error;
-        }
-
-        try {
-            $post = $this->singletonWidget('Widget_Contents_Post_Edit', NULL, "cid={$postId}");
-        } catch (Typecho_Widget_Exception $e) {
-            return new IXR_Error($e->getCode(), $e->getMessage());
-        }
-
-        $post->setCategories($postId, Typecho_Common::arrayFlatten($categories, 'categoryId'),
-        'publish' == $post->status);
-        return true;
-    }
-
-    /**
-     * 发布(重建)数据
-     *
-     * @param int $postId
-     * @param string $userName
-     * @param string $password
-     * @access public
-     * @return bool
-     */
-    public function mtPublishPost($postId, $userName, $password)
-    {
-        if (!$this->checkAccess($userName, $password, 'editor')) {
-            return $this->error;
-        }
-
-        /** 过滤id为$postId的post */
-        $select = $this->select()->where('table.contents.cid = ? AND table.contents.type = ?', $postId, 'post')->limit(1);
-
-        /** 提交查询 */
-        $post = $this->db->fetchRow($select, array($this, 'push'));
-        if ($this->authorId != $this->user->uid && !$this->checkAccess($userName, $password, 'administrator')) {
-            return new IXR_Error(403, '权限不足.');
-        }
-
-        /** 暂时只做成发布*/
-        $content = array();
-        $this->update($content, $this->db->sql()->where('table.contents.cid = ?', $postId));
-
-
-    }
-
-    /**
-     * 取得当前用户的所有blog
+     * 获取所有的标签
      *
      * @param int $blogId
      * @param string $userName
      * @param string $password
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      * @access public
-     * @return void
      */
-    public function bloggerGetUsersBlogs($blogId, $userName, $password)
+    public function GetTags($blogId, $userName, $password)
     {
-        if (!$this->checkAccess($userName, $password)) {
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return ($this->error);
+        }
+
+        try {
+            $tags = $this->singletonWidget('Widget_Metas_Tag_Cloud');
+
+            /** 初始化category数组*/
+            $categoryStructs = array();
+            while ($tags->next()) {
+                $categoryStructs[] = $this->commonCategoryTagStruct($tags, null);
+            }
+
+            return array(true, $categoryStructs);
+        } catch (Typecho_Exception $e) {
+            return new IXR_Error($e->getCode(), "获取标签失败");
+        }
+
+    }
+
+    /**
+     * 编辑文章
+     *
+     * @param int $postId
+     * @param string $userName
+     * @param string $password
+     * @param $content
+     * @return array|IXR_Error|void
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     * @access public
+     */
+    public function EditPage($postId, $userName, $password, $content)
+    {
+        $content['type'] = 'page';
+        return $this->NewPost(1, $userName, $password, $content);
+    }
+
+
+    /**
+     * 获取系统选项
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param array $options
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function GetOptions($blogId, $userName, $password, $options = array())
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, 'administrator')) {
             return $this->error;
         }
 
         $struct = array();
-        $struct[] = array(
-            'isAdmin'  => $this->user->pass('administrator', true),
-            'url'	  => $this->options->siteUrl,
-            'blogid'   => '1',
-            'blogName' => $this->options->title,
-            'xmlrpc'   => $this->options->xmlRpcUrl
-        );
-        
-        return $struct;
+        foreach ($options as $option) {
+            $select = $this->db->select()->from('table.options')
+                ->where('name = ?', $option)
+                ->where('user = ?', $blogId - 1);
+
+            $os = $this->db->fetchAll($select);
+            if (!empty($os)) {
+                foreach ($os as $o) {
+                    $struct[] = array(
+                        $o['name'],
+                        $o['value']
+                    );
+                }
+            }
+        }
+
+        return array(true, $struct);
     }
 
     /**
-     * 返回当前用户的信息
+     * 设置系统选项
      *
-     * @param int $blogId
+     * @access public
+     * @param integer $blogId
      * @param string $userName
      * @param string $password
-     * @access public
-     * @return void
+     * @param array $options
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      */
-    public function bloggerGetUserInfo($blogId, $userName, $password)
+    public function SetOptions($blogId, $userName, $password, $options = array())
     {
-        if (!$this->checkAccess($userName, $password)) {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, 'administrator')) {
             return $this->error;
         }
 
-        $struct = array(
-            'nickname'  => $this->user->screenName,
-            'userid'    => $this->user->uid,
-            'url'       => $this->user->url,
-            'email'     => $this->user->mail,
-            'lastname'  => '',
-            'firstname' => ''
+        $struct = array();
+        foreach ($options as $object) {
+            $select = $this->db->select()->from('table.options')
+                ->where('name = ?', $object[0])
+                ->where('user = ?', $blogId - 1);
+            $os = $this->db->fetchAll($select);
+            if (!empty($os)) {
+                foreach ($os as $o) {
+                    if ($this->db->query($this->db->update('table.options')
+                            ->rows(array('value' => $object[1]))
+                            ->where('user = ?', $blogId - 1)
+                            ->where('name = ?', $o['name'])) > 0) {
+                        $struct[] = array(
+                            $o['name'],
+                            $object[1]
+                        );
+                    }
+                }
+            }
+        }
+
+        return array(true, $struct);
+    }
+
+    public function commonMediasStruct($attachments, $struct)
+    {
+        return array(
+            'cid' => $attachments->cid,
+            'title' => $attachments->title,
+            'slug' => $attachments->slug,
+            'created' => $attachments->created,
+            'size' => $attachments->attachment->size,
+            'url' => $attachments->attachment->url,
+            'path' => $attachments->attachment->path,
+            'mime' => $attachments->attachment->mime,
+            'commentsNum' => $attachments->commentsNum,
+            'description' => $attachments->attachment->description,
+
+            'parent_title' => $attachments->parentPost->title,
+            'parent_cid' => $attachments->parentPost->cid,
+            'parent_type' => $attachments->parentPost->type,
+
         );
-        
-        return $struct;
     }
 
     /**
-     * 获取当前作者的一个指定id的post的详细信息
+     * 获取媒体文件
      *
-     * @param int $blogId
-     * @param int $postId
+     * @access public
+     * @param integer $blogId
      * @param string $userName
      * @param string $password
-     * @access public
-     * @return void
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      */
-    public function bloggerGetPost($blogId, $postId, $userName, $password)
+    public function GetMedias($blogId, $userName, $password, $struct)
     {
-        if (!$this->checkAccess($userName, $password)) {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, 'administrator')) {
             return $this->error;
+        }
+
+        $input = array();
+
+        if (!empty($struct['parent'])) {
+            $input['parent'] = $struct['parent'];
+        }
+
+        if (!empty($struct['mime'])) {
+            $input['mime'] = $struct['mime'];
+        }
+
+        $pageSize = 10;
+        if (!empty($struct['number'])) {
+            $pageSize = abs(intval($struct['number']));
+        }
+
+        if (!empty($struct['offset'])) {
+            $offset = abs(intval($struct['offset']));
+            $input['page'] = ceil($offset / $pageSize);
         }
 
         try {
-            $post = $this->singletonWidget('Widget_Contents_Post_Edit', NULL, "cid={$postId}");
-        } catch (Typecho_Widget_Exception $e) {
-            return new IXR_Error($e->getCode(), $e->getMessage());
+            $attachments = $this->singletonWidget('Widget_Contents_Attachment_Admin', 'pageSize=' . $pageSize, $input, false);
+            $attachmentsStruct = array();
+
+            while ($attachments->next()) {
+                $attachmentsStruct[] = $this->commonMediasStruct($attachments, null);
+            }
+            return array(true, $attachmentsStruct);
+        } catch (Typecho_Exception $e) {
+            return new IXR_Error($e->getCode(), "获取标签失败");
         }
-        
-        $categories = Typecho_Common::arrayFlatten($post->categories, 'name');
 
-        $content = '<title>' . $post->title . '</title>';
-        $content .= '<category>' . implode(',', $categories) . '</category>';
-        $content .= stripslashes($post->text);
-
-        $struct = array(
-            'userid'        => $post->authorId,
-            'dateCreated'   => new IXR_Date($this->options->timezone + $post->created),
-            'content'       => $content,
-            'postid'        => $post->cid
-        );
-        return $struct;
     }
 
     /**
-     * bloggerDeletePost
-     * 删除文章
-     * @param mixed $blogId
-     * @param mixed $userName
-     * @param mixed $password
-     * @param mixed $publish
-     * @access public
-     * @return bool
-     */
-    public function bloggerDeletePost($blogId, $postId, $userName, $password, $publish)
-    {
-        if (!$this->checkAccess($userName, $password)) {
-            return $this->error;
-        }
-        try {
-            $this->singletonWidget('Widget_Contents_Post_Edit', NULL, "cid={$postId}", false)->deletePost();
-        } catch (Typecho_Widget_Exception $e) {
-            return new IXR_Error($e->getCode(), $e->getMessage());
-        }
-    }
-
-    /**
-     * 获取当前作者前postsNum个post
+     * 清理未归档的附件
      *
-     * @param int $blogId
+     * @access public
+     * @param integer $blogId
      * @param string $userName
      * @param string $password
-     * @param int $postsNum
-     * @access public
-     * @return void
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      */
-    public function bloggerGetRecentPosts($blogId, $userName, $password, $postsNum)
+    public function ClearMedias($blogId, $userName, $password)
     {
-        if (!$this->checkAccess($userName, $password)) {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, 'administrator')) {
             return $this->error;
         }
-        //todo:限制数量
-        $posts = $this->singletonWidget('Widget_Contents_Post_Admin', "pageSize=$postsNum", 'status=all');
+        $input = array();
+        $input["do"] = "clear";
 
-        $postStructs = array();
-        while ($posts->next()) {
-            $categories = Typecho_Common::arrayFlatten($posts->categories, 'name');
-            
-            $content = '<title>' . $posts->title . '</title>';
-            $content .= '<category>' . implode(',', $categories) . '</category>';
-            $content .= stripslashes($posts->text);
+        try {
+            $mediaWidget = $this->singletonWidget('Widget_Contents_Attachment_Edit', null, $input, false);
+            $mediaWidget->action();
+            return array(true, null);
+        } catch (Typecho_Exception $e) {
+            return new IXR_Error($e->getCode(), "清理未归档的文件失败");
+        }
 
-            $struct = array(
-                'userid'        => $posts->authorId,
-                'dateCreated'   => new IXR_Date($this->options->timezone + $posts->created),
-                'content'       => $content,
-                'postid'        => $posts->cid,
+    }
+
+    /**
+     * 删除附件
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function DeleteMedia($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, 'administrator')) {
+            return $this->error;
+        }
+        if (empty($struct["cids"]) || !is_array($struct["cids"])) {
+            return new IXR_Error(403, "没有设置cids");
+        }
+
+        $input = array();
+        $input["do"] = "delete";
+        $input["cid"] = $struct["cids"];
+
+        try {
+            $mediaWidget = $this->singletonWidget('Widget_Contents_Attachment_Edit', null, $input, false);
+            $mediaWidget->action();
+            return array(true, null);
+        } catch (Typecho_Exception $e) {
+            return new IXR_Error($e->getCode(), "删除文件失败");
+        }
+
+    }
+
+    /**
+     * 编辑附件
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function EditMedia($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, 'administrator')) {
+            return $this->error;
+        }
+
+        $input = array();
+        if (empty($struct["cid"])) {
+            return new IXR_Error(403, "没有设置附件cid");
+        }
+        if (empty($struct["name"])) {
+            return new IXR_Error(403, "没有设置标题");
+        }
+        if (!empty($struct["slug"])) {
+            $input["slug"] = $struct["slug"];
+        }
+        $input["cid"] = $struct["cid"];
+        $input["name"] = $struct["name"];
+        $input["description"] = empty($struct["description"]) ? "" : $struct["description"];
+
+        $input["do"] = "update";
+        try {
+            $mediaWidget = $this->singletonWidget('Widget_Contents_Attachment_Edit', null, $input, false);
+            $mediaWidget->action();
+            return array(true, null);
+        } catch (Typecho_Exception $e) {
+            return new IXR_Error($e->getCode(), "删除文件失败");
+        }
+
+    }
+
+    /**
+     * 内容替换 - 插件
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     * @noinspection SqlNoDataSourceInspection
+     * @noinspection SqlDialectInspection
+     * @noinspection PhpSingleStatementWithBracesInspection
+     */
+    public function PluginReplace($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+        if (empty($struct['former']) || empty($struct['last']) || empty($struct['object'])) {
+            return new IXR_Error(403, _t('参数不齐,无法替换'));
+        } else {
+            $former = $struct['former'];
+            $last = $struct['last'];
+            $object = $struct['object'];
+            $array = array(
+                'post|text',
+                'post|title',
+                'page|text',
+                'page|title',
+                'field|thumb',
+                'field|mp4',
+                'field|fm',
+                'comment|text',
+                'comment|url'
             );
-            $postStructs[] = $struct;
+            if (in_array($object, $array)) {
+                $prefix = $this->db->getPrefix();
+                $obj = explode("|", $object);
+                $type = $obj[0];
+                $aim = $obj[1];
+
+                try {
+                    switch ($type) {
+                        case "post":
+                        case "page":
+                            $data_name = $prefix . 'contents';
+                            $this->db->query("UPDATE `{$data_name}` SET `{$aim}`=REPLACE(`{$aim}`,'{$former}','{$last}') WHERE type='{$type}'");
+                            break;
+                        case "field":
+                            $data_name = $prefix . 'fields';
+                            $this->db->query("UPDATE `{$data_name}` SET `str_value`=REPLACE(`str_value`,'{$former}','{$last}')  WHERE name='{$aim}'");
+                            break;
+                        case "comment":
+                            $data_name = $prefix . 'comments';
+                            $this->db->query("UPDATE `{$data_name}` SET `{$aim}`=REPLACE(`{$aim}`,'{$former}','{$last}')");
+                    }
+                    return array(true, null);
+                } catch (Typecho_Widget_Exception $e) {
+                    return new IXR_Error($e->getCode(), $e->getMessage());
+                }
+
+            } else {
+                return new IXR_Error(403, _t('不含此参数,无法替换'));
+            }
         }
-        if (NULL == $postStructs) {
-            return new IXR_Error('404', '没有任何文章');
-        }
-        return $postStructs;
     }
 
     /**
-     * bloggerGetTemplate
+     * 友情链接管理 - 插件
      *
-     * @param int $blogId
+     * @access public
+     * @param integer $blogId
      * @param string $userName
      * @param string $password
-     * @param mixed $template
-     * @access public
-     * @return void
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      */
-    public function bloggerGetTemplate($blogId, $userName, $password, $template)
+    public function PluginDynamics($blogId, $userName, $password, $struct)
     {
-        if (!$this->checkAccess($userName, $password)) {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
-        /** todo:暂时先返回true*/
-        return true;
+
+        /** @noinspection PhpUndefinedFieldInspection */
+        if (!isset($this->options->plugins['activated']['Dynamics'])) {
+            return new IXR_Error(403, "没有启用我的动态插件");
+        }
+
+        if (!is_array($struct)) {
+            return new IXR_Error(403, "struct不是一个数组对象");
+        }
+
+        if (!isset($struct['method'])) {
+            return new IXR_Error(403, "没有设定模式");
+        }
+
+        if ($struct['method'] == "insert") {
+            try {
+                if (empty($struct['dynamic'])) {
+                    return new IXR_Error(403, "没有设定dynamic对象");
+                }
+                $dynamicMap = $struct['dynamic'];
+                $dynamic = array();
+                if (empty($dynamicMap['text'])) {
+                    return new IXR_Error(403, "没有写动态内容");
+                }
+                if (!empty($dynamicMap['status'])) {
+                    $dynamic['status'] = $dynamicMap['status'];
+                }
+                $date = (new Typecho_Date($this->options->gmtTime))->time();
+                $dynamic['text'] = $dynamicMap['text'];
+                $dynamic['authorId'] = $blogId;
+                $dynamic['modified'] = $date;
+                if (isset($dynamicMap['did'])) $dynamic['did'] = intval($dynamicMap['did']);
+
+                if (isset($dynamic['did'])) {
+                    /** 更新数据 */
+                    $this->db->query($this->db->update('table.dynamics')->rows($dynamic)->where('did = ?', $dynamic['did']));
+                } else {
+                    $dynamic['created'] = $date;
+                    /** 插入数据 */
+                    $dynamic['did'] = $this->db->query($this->db->insert('table.dynamics')->rows($dynamic));
+                }
+                return array(true, $dynamic);
+            } catch (Typecho_Widget_Exception $e) {
+                return new IXR_Error($e->getCode(), $e->getMessage());
+            }
+        } else if ($struct['method'] == "delete") {
+            $dids = $struct['dids'];
+            if (!is_array($dids)) {
+                return new IXR_Error(403, "dids 不是一个数组对象");
+            }
+            $deleteCount = 0;
+            foreach ($dids as $did) {
+                if ($this->db->query($this->db->delete('table.dynamics')->where('did = ?', $did))) {
+                    $deleteCount++;
+                }
+            }
+            return array(true, $deleteCount);
+        } else {
+            try {
+                $select = $this->db->select()->from('table.dynamics')
+                    ->where('table.dynamics.authorId = ?', $blogId);
+
+                $pageSize = empty($struct['number']) ? 10 : abs(intval($struct['number']));
+                $currentPage = empty($struct['offset']) ? 1 : ceil(abs(intval($struct['offset'])) / $pageSize);
+                $select->order('table.dynamics.created', Typecho_Db::SORT_DESC)
+                    ->page($currentPage, $pageSize);
+
+                $dynamics = $this->db->fetchAll($select);
+                return array(true, $dynamics);
+            } catch (Typecho_Widget_Exception $e) {
+                return new IXR_Error($e->getCode(), $e->getMessage());
+            }
+        }
     }
 
     /**
-     * bloggerSetTemplate
+     * 友情链接管理 - 插件
      *
-     * @param int $blogId
+     * @access public
+     * @param integer $blogId
      * @param string $userName
      * @param string $password
-     * @param mixed $content
-     * @param mixed $template
-     * @access public
-     * @return void
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
      */
-    public function bloggerSetTemplate($blogId, $userName, $password, $content, $template)
+    public function PluginMessages($blogId, $userName, $password, $struct)
     {
-        if (!$this->checkAccess($userName, $password)) {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
             return $this->error;
         }
-        /** todo:暂时先返回true*/
-        return true;
+
+        /** @noinspection PhpUndefinedFieldInspection */
+        if (!isset($this->options->plugins['activated']['Messages'])) {
+            return new IXR_Error(403, "没有启用 messages 插件");
+        }
+
+        if (!is_array($struct)) {
+            return new IXR_Error(403, "struct不是一个数组对象");
+        }
+
+        if (!isset($struct['method'])) {
+            return new IXR_Error(403, "没有设定模式");
+        }
+
+        if ($struct['method'] == "delete") {
+            $mids = $struct['mids'];
+            if (!is_array($mids)) {
+                return new IXR_Error(403, "mids 不是一个数组对象");
+            }
+            $deleteCount = 0;
+            foreach ($mids as $mid) {
+                if ($this->db->query($this->db->delete('table.messages')->where('mid = ?', $mid))) {
+                    $deleteCount++;
+                }
+            }
+            return array(true, $deleteCount);
+        } else if ($struct['method'] == "destroy") {
+            $this->db->query($this->db->delete('table.messages')
+                ->where('destroy <?', time())
+                ->where('authorId =? ', $blogId)
+            );
+            return array(true, null);
+        } else {
+            try {
+                $select = $this->db->select()->from('table.messages')
+                    ->where('table.messages.authorId = ?', $blogId);
+
+                $pageSize = empty($struct['number']) ? 10 : abs(intval($struct['number']));
+                $currentPage = empty($struct['offset']) ? 1 : ceil(abs(intval($struct['offset'])) / $pageSize);
+                $select->order('table.messages.created', Typecho_Db::SORT_DESC)
+                    ->page($currentPage, $pageSize);
+
+                $messages = $this->db->fetchAll($select);
+                return array(true, $messages);
+            } catch (Typecho_Widget_Exception $e) {
+                return new IXR_Error($e->getCode(), $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * 友情链接管理 - 插件
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function PluginLinks($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+
+        /** @noinspection PhpUndefinedFieldInspection */
+        if (!isset($this->options->plugins['activated']['Links'])) {
+            return new IXR_Error(403, "没有启用插件");
+        }
+
+        if (!is_array($struct)) {
+            return new IXR_Error(403, "struct不是一个数组对象");
+        }
+
+        if (!isset($struct['method'])) {
+            return new IXR_Error(403, "没有设定模式");
+        }
+
+        if ($struct['method'] == "insert") {
+            try {
+                if (!isset($struct['link'])) {
+                    return new IXR_Error(403, "没有link对象");
+                }
+                $linkMap = $struct['link'];
+
+                if (!isset($linkMap['name'])) {
+                    return new IXR_Error(403, "没有设定名字");
+                }
+                if (!isset($linkMap['url'])) {
+                    return new IXR_Error(403, "没有设定链接地址");
+                }
+
+                $link = array();
+                $link['name'] = $linkMap['name'];
+                $link['url'] = $linkMap['url'];
+                if (isset($linkMap['lid'])) $link['lid'] = intval($linkMap['lid']);
+                if (isset($linkMap['image'])) $link['image'] = $linkMap['image'];
+                if (isset($linkMap['description'])) $link['description'] = $linkMap['description'];
+                if (isset($linkMap['user'])) $link['user'] = $linkMap['user'];
+                if (isset($linkMap['order'])) $link['order'] = $linkMap['order'];
+                if (isset($linkMap['sort'])) $link['sort'] = $linkMap['sort'];
+
+                if (isset($link['lid'])) {
+                    /** 更新数据 */
+                    $this->db->query($this->db->update('table.links')->rows($link)->where('lid = ?', $link['lid']));
+                } else {
+                    $link['order'] = $this->db->fetchObject($this->db->select(array('MAX(order)' => 'maxOrder'))->from('table.links'))->maxOrder + 1;
+                    /** 插入数据 */
+                    $link['lid'] = $this->db->query($this->db->insert('table.links')->rows($link));
+                }
+                return array(true, $link);
+            } catch (Typecho_Widget_Exception $e) {
+                return new IXR_Error($e->getCode(), $e->getMessage());
+            }
+        } else if ($struct['method'] == "delete") {
+            $lids = $struct['lids'];
+            if (!is_array($lids)) {
+                return new IXR_Error(403, "lids 不是一个数组对象");
+            }
+            $deleteCount = 0;
+            foreach ($lids as $lid) {
+                if ($this->db->query($this->db->delete('table.links')->where('lid = ?', $lid))) {
+                    $deleteCount++;
+                }
+            }
+            return array(true, $deleteCount);
+        } else {
+            try {
+                $select = $this->db->select()->from('table.links');
+
+                $pageSize = empty($struct['number']) ? 10 : abs(intval($struct['number']));
+                $currentPage = empty($struct['offset']) ? 1 : ceil(abs(intval($struct['offset'])) / $pageSize);
+                $select->order('table.links.order', Typecho_Db::SORT_ASC)
+                    ->page($currentPage, $pageSize);
+
+                $links = $this->db->fetchAll($select);
+                return array(true, $links);
+            } catch (Typecho_Widget_Exception $e) {
+                return new IXR_Error($e->getCode(), $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * 插件配置管理
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function ConfigPlugins($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+
+        if (!isset($struct['method'])) {
+            return new IXR_Error(403, "没有设定模式");
+        }
+
+        if (!isset($struct['pluginName'])) {
+            return new IXR_Error(403, "没有设定插件名字");
+        }
+
+        /** @noinspection PhpUndefinedFieldInspection */
+        if (!isset($this->options->plugins['activated']{$struct['pluginName']})) {
+            return new IXR_Error(403, "没有启用插件");
+        }
+
+        if ($struct['method'] == "edit") {
+            if (!isset($struct['settings']) || !is_array($struct['settings'])) {
+                return new IXR_Error(403, "settings 不规范");
+            }
+
+            if (empty($struct['settings'])) {
+                return new IXR_Error(403, "settings 不规范");
+            }
+
+            try {
+                $this->singletonWidget('Widget_Plugins_Edit', NULL, NULL, false)->configPlugin(
+                    $struct['pluginName'],
+                    $struct['settings']
+                );
+                return array(true, null);
+            } catch (Typecho_Exception $e) {
+                return new IXR_Error($e->getCode(), $e->getMessage());
+            }
+        } else {
+            $select = $this->db->select()->from('table.options')
+                ->where('name = ?', 'plugin:' . $struct['pluginName']);
+
+            $options = $this->db->fetchAll($select);
+            $data = array();
+            foreach ($options as $option) {
+                $data[] = unserialize($option['value']);
+            }
+            return array(true, $data);
+        }
+
+    }
+
+    /**
+     * 主题配置管理
+     *
+     * @access public
+     * @param integer $blogId
+     * @param string $userName
+     * @param string $password
+     * @param $struct
+     * @return array|IXR_Error
+     * @throws Typecho_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function ConfigTheme($blogId, $userName, $password, $struct)
+    {
+        /** 检查权限*/
+        if (!$this->checkAccess($userName, $password, "administrator")) {
+            return $this->error;
+        }
+
+        if (!isset($struct['method'])) {
+            return new IXR_Error(403, "没有设定模式");
+        }
+
+        /** @noinspection PhpUndefinedFieldInspection */
+        $theme = $this->options->theme;
+        $select = $this->db->select()->from('table.options')
+            ->where('name = ?', 'theme:' . $theme);
+
+        $options = $this->db->fetchAll($select);
+
+        if ($struct['method'] == "edit") {
+            if (!isset($struct['settings']) || !is_array($struct['settings'])) {
+                return new IXR_Error(403, "settings 不规范");
+            }
+
+            if (empty($struct['settings'])) {
+                return new IXR_Error(403, "settings 不规范");
+            }
+            try {
+                foreach ($options as $option) {
+                    $value = unserialize($option['value']);
+                    $value = array_merge($value, $struct['settings']);
+
+                    $this->db->query($this->db->update('table.options')
+                        ->rows(array('value' => serialize($value)))
+                        ->where('name = ?', 'theme:' . $theme)
+                        ->where('user = ?', $option['user']));
+                }
+                return array(true, null);
+            } catch (Typecho_Exception $e) {
+                return new IXR_Error($e->getCode(), $e->getMessage());
+            }
+        } else {
+            $data = array();
+            foreach ($options as $option) {
+                $data[] = unserialize($option['value']);
+            }
+            $data[] = array(
+                "name" => $theme
+            );
+            return array(true, $data);
+        }
+
     }
 
     /**
@@ -2048,8 +2084,12 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
      *
      * @param string $source
      * @param string $target
+     * @return IXR_Error|void
+     * @throws Typecho_Exception
      * @access public
-     * @return void
+     * @noinspection PhpUnhandledExceptionInspection
+     * @noinspection RegExpRedundantEscape
+     * @noinspection PhpUndefinedMethodInspection
      */
     public function pingbackPing($source, $target)
     {
@@ -2078,8 +2118,12 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
 
                 /** 现在可以ping了，但是还得检查下这个pingback是否已经存在了*/
                 $pingNum = $this->db->fetchObject($this->db->select(array('COUNT(coid)' => 'num'))
-                ->from('table.comments')->where('table.comments.cid = ? AND table.comments.url = ? AND table.comments.type <> ?',
-                $post->cid, $source, 'comment'))->num;
+                    ->from('table.comments')->where(
+                        'table.comments.cid = ? AND table.comments.url = ? AND table.comments.type <> ?',
+                        $post->cid,
+                        $source,
+                        'comment'
+                    ))->num;
 
                 if ($pingNum <= 0) {
                     /** 检查源地址是否存在*/
@@ -2100,11 +2144,9 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
                                     return new IXR_Error(50, _t('源地址不支持PingBack'));
                                 }
                             }
-
                         } else {
                             return new IXR_Error(16, _t('源地址服务器错误'));
                         }
-
                     } catch (Exception $e) {
                         return new IXR_Error(16, _t('源地址服务器错误'));
                     }
@@ -2126,7 +2168,7 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
                     foreach ($lines as $line) {
                         $line = trim($line);
                         if (NULL != $line) {
-                            if (preg_match("|<a[^>]*href=[\"']{$pregLink}[\"'][^>]*>(.*?)</a>|",$line)) {
+                            if (preg_match("|<a[^>]*href=[\"']{$pregLink}[\"'][^>]*>(.*?)</a>|", $line)) {
                                 if (strlen($line) > strlen($finalText)) {
                                     /** <a>也要干掉，*/
                                     $finalText = Typecho_Common::stripTags($line);
@@ -2143,16 +2185,16 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
                     $finalText = '[...]' . Typecho_Common::subStr($finalText, 0, 200, '') . '[...]';
 
                     $pingback = array(
-                        'cid'       =>  $post->cid,
-                        'created'   =>  $this->options->time,
-                        'agent'     =>  $this->request->getAgent(),
-                        'ip'        =>  $this->request->getIp(),
-                        'author'    =>  $finalTitle,
-                        'url'       =>  Typecho_Common::safeUrl($source),
-                        'text'      =>  $finalText,
-                        'ownerId'   =>  $post->author->uid,
-                        'type'      =>  'pingback',
-                        'status'    =>  $this->options->commentsRequireModeration ? 'waiting' : 'approved'
+                        'cid' => $post->cid,
+                        'created' => $this->options->time,
+                        'agent' => $this->request->getAgent(),
+                        'ip' => $this->request->getIp(),
+                        'author' => Typecho_Common::subStr($finalTitle, 0, 150, '...'),
+                        'url' => Typecho_Common::safeUrl($source),
+                        'text' => $finalText,
+                        'ownerId' => $post->author->uid,
+                        'type' => 'pingback',
+                        'status' => $this->options->commentsRequireModeration ? 'waiting' : 'approved'
                     );
 
                     /** 加入plugin */
@@ -2177,10 +2219,10 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
             return new IXR_Error(33, _t('这个目标地址不存在'));
         }
     }
-    
+
     /**
      * 回收变量
-     * 
+     *
      * @access public
      * @param string $methodName 方法
      * @return void
@@ -2200,6 +2242,7 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
      *
      * @access public
      * @return void
+     * @throws Typecho_Widget_Exception
      */
     public function action()
     {
@@ -2209,7 +2252,7 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
 
         if (isset($this->request->rsd)) {
             echo
-<<<EOF
+            <<<EOF
 <?xml version="1.0" encoding="{$this->options->charset}"?>
 <rsd version="1.0" xmlns="http://archipelago.phrasewise.com/rsd">
     <service>
@@ -2217,17 +2260,14 @@ class Widget_XmlRpc extends Widget_Abstract_Contents implements Widget_Interface
         <engineLink>http://www.typecho.org/</engineLink>
         <homePageLink>{$this->options->siteUrl}</homePageLink>
         <apis>
-            <api name="WordPress" blogID="1" preferred="true" apiLink="{$this->options->xmlRpcUrl}" />
-            <api name="Movable Type" blogID="1" preferred="false" apiLink="{$this->options->xmlRpcUrl}" />
-            <api name="MetaWeblog" blogID="1" preferred="false" apiLink="{$this->options->xmlRpcUrl}" />
-            <api name="Blogger" blogID="1" preferred="false" apiLink="{$this->options->xmlRpcUrl}" />
+            <api name="Typecho" blogID="1" preferred="true" apiLink="{$this->options->xmlRpcUrl}" />
         </apis>
     </service>
 </rsd>
 EOF;
         } else if (isset($this->request->wlw)) {
             echo
-<<<EOF
+            <<<EOF
 <?xml version="1.0" encoding="{$this->options->charset}"?>
 <manifest xmlns="http://schemas.microsoft.com/wlw/manifest/weblog">
     <options>
@@ -2265,79 +2305,49 @@ EOF;
         } else {
 
             $api = array(
-                /** WordPress API */
-                'wp.getPage'                => array($this, 'wpGetPage'),
-                'wp.getPages'               => array($this, 'wpGetPages'),
-                'wp.newPage'                => array($this, 'wpNewPage'),
-                'wp.deletePage'             => array($this, 'wpDeletePage'),
-                'wp.editPage'               => array($this, 'wpEditPage'),
-                'wp.getPageList'            => array($this, 'wpGetPageList'),
-                'wp.getAuthors'             => array($this, 'wpGetAuthors'),
-                'wp.getCategories'          => array($this, 'mwGetCategories'),
-                'wp.newCategory'            => array($this, 'wpNewCategory'),
-                'wp.suggestCategories'      => array($this, 'wpSuggestCategories'),
-                'wp.uploadFile'             => array($this, 'mwNewMediaObject'),
-                
-                /** New Wordpress API since 2.9.2 */
-                'wp.getUsersBlogs'          => array($this, 'wpGetUsersBlogs'),
-                'wp.getTags'                => array($this, 'wpGetTags'),
-                'wp.deleteCategory'         => array($this, 'wpDeleteCategory'),
-                'wp.getCommentCount'        => array($this, 'wpGetCommentCount'),
-                'wp.getPostStatusList'      => array($this, 'wpGetPostStatusList'),
-                'wp.getPageStatusList'      => array($this, 'wpGetPageStatusList'),
-                'wp.getPageTemplates'       => array($this, 'wpGetPageTemplates'),
-                'wp.getOptions'             => array($this, 'wpGetOptions'),
-                'wp.setOptions'             => array($this, 'wpSetOptions'),
-                'wp.getComment'             => array($this, 'wpGetComment'),
-                'wp.getComments'            => array($this, 'wpGetComments'),
-                'wp.deleteComment'          => array($this, 'wpDeleteComment'),
-                'wp.editComment'            => array($this, 'wpEditComment'),
-                'wp.newComment'             => array($this, 'wpNewComment'),
-                'wp.getCommentStatusList'   => array($this, 'wpGetCommentStatusList'),
-
-                /** New Wordpress API after 2.9.2 */
-                'wp.getProfile'             => array($this, 'wpGetProfile'),
-                'wp.getPostFormats'         => array($this, 'wpGetPostFormats'),
-                'wp.getMediaLibrary'        => array($this, 'wpGetMediaLibrary'),
-                'wp.getMediaItem'           => array($this, 'wpGetMediaItem'),
-                'wp.editPost'               => array($this, 'wpEditPost'),
-
-                /** Blogger API */
-                'blogger.getUsersBlogs'     => array($this, 'bloggerGetUsersBlogs'),
-                'blogger.getUserInfo'       => array($this, 'bloggerGetUserInfo'),
-                'blogger.getPost'           => array($this, 'bloggerGetPost'),
-                'blogger.getRecentPosts'    => array($this, 'bloggerGetRecentPosts'),
-                'blogger.getTemplate'       => array($this, 'bloggerGetTemplate'),
-                'blogger.setTemplate'       => array($this, 'bloggerSetTemplate'),
-                'blogger.deletePost'        => array($this, 'bloggerDeletePost'),
-
-                /** MetaWeblog API (with MT extensions to structs) */
-                'metaWeblog.newPost'        => array($this, 'mwNewPost'),
-                'metaWeblog.editPost'       => array($this, 'mwEditPost'),
-                'metaWeblog.getPost'        => array($this, 'mwGetPost'),
-                'metaWeblog.getRecentPosts' => array($this, 'mwGetRecentPosts'),
-                'metaWeblog.getCategories'  => array($this, 'mwGetCategories'),
-                'metaWeblog.newMediaObject' => array($this, 'mwNewMediaObject'),
-
-                /** MetaWeblog API aliases for Blogger API */
-                'metaWeblog.deletePost'     => array($this, 'bloggerDeletePost'),
-                'metaWeblog.getTemplate'    => array($this, 'bloggerGetTemplate'),
-                'metaWeblog.setTemplate'    => array($this, 'bloggerSetTemplate'),
-                'metaWeblog.getUsersBlogs'  => array($this, 'bloggerGetUsersBlogs'),
-
-                /** MovableType API */
-                'mt.getCategoryList'        => array($this, 'mtGetCategoryList'),
-                'mt.getRecentPostTitles'    => array($this, 'mtGetRecentPostTitles'),
-                'mt.getPostCategories'      => array($this, 'mtGetPostCategories'),
-                'mt.setPostCategories'      => array($this, 'mtSetPostCategories'),
-                'mt.publishPost'            => array($this, 'mtPublishPost'),
+                /** Typecho API */
+                'typecho.getManifest' => array($this, 'GetManifest'),
+                'typecho.getUser' => array($this, 'GetUser'),
+                'typecho.getStat' => array($this, 'GetStat'),
+                'typecho.newPost' => array($this, 'NewPost'),
+                'typecho.editPost' => array($this, 'EditPost'),
+                'typecho.getPost' => array($this, 'GetPost'),
+                'typecho.deletePost' => array($this, 'DeletePost'),
+                'typecho.getPosts' => array($this, 'GetPosts'),
+                'typecho.getPage' => array($this, 'GetPage'),
+                'typecho.editPage' => array($this, 'EditPage'),
+                'typecho.getPages' => array($this, 'GetPages'),
+                'typecho.newComment' => array($this, 'NewComment'),
+                'typecho.getComments' => array($this, 'GetComments'),
+                'typecho.editComment' => array($this, 'EditComment'),
+                'typecho.deleteComment' => array($this, 'DeleteComment'),
+                'typecho.getCategories' => array($this, 'GetCategories'),
+                'typecho.newCategory' => array($this, 'NewCategory'),
+                'typecho.editCategory' => array($this, 'EditCategory'),
+                'typecho.deleteCategory' => array($this, 'DeleteCategory'),
+                'typecho.getOptions' => array($this, 'GetOptions'),
+                'typecho.setOptions' => array($this, 'SetOptions'),
+                'typecho.getTags' => array($this, 'GetTags'),
+                'typecho.getAlarmComments' => array($this, 'GetAlarmComments'),
+                'typecho.newMedia' => array($this, 'NewMedia'),
+                'typecho.getMedias' => array($this, 'GetMedias'),
+                'typecho.editMedia' => array($this, "EditMedia"),
+                'typecho.deleteMedia' => array($this, "DeleteMedia"),
+                'typecho.clearMedias' => array($this, "ClearMedias"),
+                'typecho.pluginReplace' => array($this, 'PluginReplace'),
+                'typecho.pluginLinks' => array($this, 'PluginLinks'),
+                'typecho.pluginDynamics' => array($this, 'PluginDynamics'),
+                'typecho.pluginMessages' => array($this, 'PluginMessages'),
+                'typecho.configPlugins' => array($this, 'ConfigPlugins'),
+                'typecho.configTheme' => array($this, 'ConfigTheme'),
+                'typecho.getAlarmMessages' => array($this, 'GetAlarmMessages'),
 
                 /** PingBack */
-                'pingback.ping'             => array($this,'pingbackPing'),
+                'pingback.ping' => array($this, 'pingbackPing'),
                 // 'pingback.extensions.getPingbacks' => array($this,'pingbackExtensionsGetPingbacks'),
-                
+
                 /** hook after */
-                'hook.afterCall'            => array($this, 'hookAfterCall'),
+                'hook.afterCall' => array($this, 'hookAfterCall'),
             );
 
             if (1 == $this->options->allowXmlRpc) {
