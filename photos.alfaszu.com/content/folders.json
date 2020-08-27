@@ -1,11 +1,12 @@
 {
     "index": {
         "url": "index",
-        "index": 9
+        "index": 1
     },
     "examples": {
         "url": "examples",
-        "index": 10
+        "index": 10,
+        "hidden": true
     },
     "examples\/assets": {
         "url": "examples\/assets",
@@ -14,7 +15,8 @@
     },
     "contact": {
         "url": "contact",
-        "index": 11
+        "index": 11,
+        "hidden": true
     },
     "examples\/gallery": {
         "url": "examples\/gallery",
@@ -203,308 +205,315 @@
     "examples\/plugins\/panorama": {
         "url": "examples\/plugins\/panorama"
     },
-    "event": {
-        "url": "event",
+    "招新": {
+        "url": "招新",
+        "index": 6
+    },
+    "招新\/2006recruit": {
+        "url": "招新\/2006recruit",
+        "index": 11
+    },
+    "招新\/2005recruit": {
+        "url": "招新\/2005recruit",
+        "index": 12
+    },
+    "招新\/2017recruit": {
+        "url": "招新\/2017recruit",
         "index": 3
     },
-    "event\/2004cos": {
-        "url": "event\/2004cos",
+    "招新\/2019recruit": {
+        "url": "招新\/2019recruit",
+        "index": 1
+    },
+    "招新\/2012recruit": {
+        "url": "招新\/2012recruit",
+        "index": 7
+    },
+    "招新\/2015recruit": {
+        "url": "招新\/2015recruit",
         "index": 5
     },
-    "CV": {
-        "url": "CV",
-        "index": 5
-    },
-    "CV\/2018CV": {
-        "url": "CV\/2018CV",
-        "index": 2
-    },
-    "CV\/2016CV": {
-        "url": "CV\/2016CV",
+    "招新\/2016recruit": {
+        "url": "招新\/2016recruit",
         "index": 4
     },
-    "CV\/2019CV": {
-        "url": "CV\/2019CV",
+    "招新\/2018recruit": {
+        "url": "招新\/2018recruit",
+        "index": 2
+    },
+    "招新\/2010recruit": {
+        "url": "招新\/2010recruit",
+        "index": 9
+    },
+    "招新\/2011recruit": {
+        "url": "招新\/2011recruit",
+        "index": 8
+    },
+    "招新\/2013recruit": {
+        "url": "招新\/2013recruit",
+        "index": 6
+    },
+    "招新\/2009recruit": {
+        "url": "招新\/2009recruit",
+        "index": 10
+    },
+    "CV大赛": {
+        "url": "CV大赛",
+        "index": 7
+    },
+    "CV大赛\/2018CV": {
+        "url": "CV大赛\/2018CV",
+        "index": 2
+    },
+    "CV大赛\/2016CV": {
+        "url": "CV大赛\/2016CV",
+        "index": 4
+    },
+    "CV大赛\/2019CV": {
+        "url": "CV大赛\/2019CV",
         "index": 1
     },
-    "matsuri": {
-        "url": "matsuri",
+    "CV大赛\/2017CV": {
+        "url": "CV大赛\/2017CV",
+        "index": 3
+    },
+    "CV大赛\/2014CV": {
+        "url": "CV大赛\/2014CV",
+        "index": 5
+    },
+    "CV大赛\/2013CV": {
+        "url": "CV大赛\/2013CV",
+        "index": 6
+    },
+    "CV大赛\/2012CV": {
+        "url": "CV大赛\/2012CV",
+        "index": 7
+    },
+    "CV大赛\/2011CV": {
+        "url": "CV大赛\/2011CV",
+        "index": 8
+    },
+    "作品": {
+        "url": "作品",
+        "index": 2
+    },
+    "作品\/cosplay": {
+        "url": "作品\/cosplay"
+    },
+    "作品\/cosplay\/2013-2014": {
+        "url": "作品\/cosplay\/2013-2014",
+        "index": 3
+    },
+    "作品\/cosplay\/2014-2015": {
+        "url": "作品\/cosplay\/2014-2015",
+        "index": 2
+    },
+    "作品\/cosplay\/2017-2018": {
+        "url": "作品\/cosplay\/2017-2018",
         "index": 1
     },
-    "matsuri\/2011summer": {
-        "url": "matsuri\/2011summer",
+    "作品\/resource": {
+        "url": "作品\/resource",
+        "hidden": true
+    },
+    "作品\/resource\/LOGO": {
+        "url": "作品\/resource\/LOGO"
+    },
+    "作品\/cosplay\/2010": {
+        "url": "作品\/cosplay\/2010",
+        "index": 5
+    },
+    "作品\/cosplay\/2010\/bad": {
+        "hidden": true,
+        "url": "作品\/cosplay\/2010\/bad"
+    },
+    "作品\/cosplay\/2011": {
+        "url": "作品\/cosplay\/2011",
+        "index": 4
+    },
+    "作品\/resource\/RPG": {
+        "url": "作品\/resource\/RPG"
+    },
+    "活动": {
+        "url": "活动",
+        "index": 5
+    },
+    "活动\/2004cos": {
+        "url": "活动\/2004cos",
+        "index": 5
+    },
+    "活动\/ALFA6th": {
+        "url": "活动\/ALFA6th",
+        "index": 3
+    },
+    "活动\/2007dongmen": {
+        "url": "活动\/2007dongmen",
+        "index": 4
+    },
+    "活动\/dump": {
+        "url": "活动\/dump",
+        "index": 1
+    },
+    "活动\/2018fireflyacg": {
+        "url": "活动\/2018fireflyacg",
+        "index": 2
+    },
+    "社团日常": {
+        "url": "社团日常",
+        "index": 4
+    },
+    "社团日常\/2018-2019": {
+        "url": "社团日常\/2018-2019",
+        "index": 2
+    },
+    "社团日常\/2016-2017": {
+        "url": "社团日常\/2016-2017",
+        "index": 4
+    },
+    "社团日常\/2013-2014": {
+        "url": "社团日常\/2013-2014",
+        "index": 6
+    },
+    "社团日常\/2014-2015": {
+        "url": "社团日常\/2014-2015",
+        "index": 5
+    },
+    "社团日常\/2017-2018": {
+        "url": "社团日常\/2017-2018",
+        "index": 3
+    },
+    "社团日常\/2019-2020": {
+        "url": "社团日常\/2019-2020",
+        "index": 1
+    },
+    "ALFA祭": {
+        "url": "ALFA祭",
+        "index": 3
+    },
+    "ALFA祭\/2011summer": {
+        "url": "ALFA祭\/2011summer",
         "index": 16
     },
-    "matsuri\/2011summer\/shadow": {
-        "url": "matsuri\/2011summer\/shadow",
+    "ALFA祭\/2011summer\/shadow": {
+        "url": "ALFA祭\/2011summer\/shadow",
         "hidden": true
     },
-    "matsuri\/art_exhibition": {
-        "url": "matsuri\/art_exhibition",
+    "ALFA祭\/art_exhibition": {
+        "url": "ALFA祭\/art_exhibition",
         "index": 17
     },
-    "matsuri\/2019summer": {
-        "url": "matsuri\/2019summer",
+    "ALFA祭\/2019summer": {
+        "url": "ALFA祭\/2019summer",
         "index": 2
     },
-    "matsuri\/2018autumn": {
-        "url": "matsuri\/2018autumn",
+    "ALFA祭\/2018autumn": {
+        "url": "ALFA祭\/2018autumn",
         "index": 3
     },
-    "matsuri\/2018summer": {
-        "url": "matsuri\/2018summer",
+    "ALFA祭\/2018summer": {
+        "url": "ALFA祭\/2018summer",
         "index": 4
     },
-    "matsuri\/2017autumn": {
-        "url": "matsuri\/2017autumn",
+    "ALFA祭\/2017autumn": {
+        "url": "ALFA祭\/2017autumn",
         "index": 5
     },
-    "matsuri\/2016autumn": {
-        "url": "matsuri\/2016autumn",
+    "ALFA祭\/2016autumn": {
+        "url": "ALFA祭\/2016autumn",
         "index": 7
     },
-    "matsuri\/2014summer": {
-        "url": "matsuri\/2014summer",
+    "ALFA祭\/2014summer": {
+        "url": "ALFA祭\/2014summer",
         "index": 11
     },
-    "matsuri\/2011autumn": {
-        "url": "matsuri\/2011autumn",
+    "ALFA祭\/2011autumn": {
+        "url": "ALFA祭\/2011autumn",
         "index": 15
     },
-    "matsuri\/2013autumn": {
-        "url": "matsuri\/2013autumn",
+    "ALFA祭\/2013autumn": {
+        "url": "ALFA祭\/2013autumn",
         "index": 12
     },
-    "nichijo": {
-        "url": "nichijo",
-        "index": 2
-    },
-    "nichijo\/2018-2019": {
-        "url": "nichijo\/2018-2019",
-        "index": 2
-    },
-    "nichijo\/2016-2017": {
-        "url": "nichijo\/2016-2017",
-        "index": 4
-    },
-    "nichijo\/2013-2014": {
-        "url": "nichijo\/2013-2014",
-        "index": 6
-    },
-    "nichijo\/2014-2015": {
-        "url": "nichijo\/2014-2015",
-        "index": 5
-    },
-    "nichijo\/2017-2018": {
-        "url": "nichijo\/2017-2018",
-        "index": 3
-    },
-    "paint": {
-        "url": "paint",
-        "index": 6
-    },
-    "recruit": {
-        "url": "recruit",
-        "index": 4
-    },
-    "recruit\/2006recruit": {
-        "url": "recruit\/2006recruit",
-        "index": 11
-    },
-    "recruit\/2005recruit": {
-        "url": "recruit\/2005recruit",
-        "index": 12
-    },
-    "RPG": {
-        "url": "RPG",
-        "index": 7
-    },
-    "matsuri\/2019autumn": {
-        "url": "matsuri\/2019autumn",
+    "ALFA祭\/2019autumn": {
+        "url": "ALFA祭\/2019autumn",
         "index": 1
     },
-    "recruit\/2017recruit": {
-        "url": "recruit\/2017recruit",
-        "index": 3
-    },
-    "nichijo\/2019-2020": {
-        "url": "nichijo\/2019-2020",
-        "index": 1
-    },
-    "recruit\/2019recruit": {
-        "url": "recruit\/2019recruit",
-        "index": 1
-    },
-    "event\/ALFA6th": {
-        "url": "event\/ALFA6th",
-        "index": 3
-    },
-    "event\/2007dongmen": {
-        "url": "event\/2007dongmen",
-        "index": 4
-    },
-    "works": {
-        "url": "works"
-    },
-    "works\/calendar": {
-        "url": "works\/calendar",
-        "index": 2
-    },
-    "works\/calendar\/2003": {
-        "url": "works\/calendar\/2003",
-        "index": 3
-    },
-    "works\/calendar\/2004": {
-        "url": "works\/calendar\/2004",
-        "index": 2
-    },
-    "works\/calendar\/2005": {
-        "url": "works\/calendar\/2005",
-        "index": 1
-    },
-    "matsuri\/2012summer": {
-        "url": "matsuri\/2012summer",
+    "ALFA祭\/2012summer": {
+        "url": "ALFA祭\/2012summer",
         "index": 14
     },
-    "recruit\/2012recruit": {
-        "url": "recruit\/2012recruit",
-        "index": 7
-    },
-    "recruit\/2015recruit": {
-        "url": "recruit\/2015recruit",
-        "index": 5
-    },
-    "recruit\/2016recruit": {
-        "url": "recruit\/2016recruit",
-        "index": 4
-    },
-    "recruit\/2018recruit": {
-        "url": "recruit\/2018recruit",
-        "index": 2
-    },
-    "matsuri\/2015autumn": {
-        "url": "matsuri\/2015autumn",
+    "ALFA祭\/2015autumn": {
+        "url": "ALFA祭\/2015autumn",
         "index": 9
     },
-    "CV\/2017CV": {
-        "url": "CV\/2017CV",
-        "index": 3
-    },
-    "matsuri\/2016summer": {
-        "url": "matsuri\/2016summer",
+    "ALFA祭\/2016summer": {
+        "url": "ALFA祭\/2016summer",
         "index": 8
     },
-    "matsuri\/2017summer": {
-        "url": "matsuri\/2017summer",
+    "ALFA祭\/2017summer": {
+        "url": "ALFA祭\/2017summer",
         "index": 6
     },
-    "matsuri\/2014autumn": {
-        "url": "matsuri\/2014autumn",
+    "ALFA祭\/2014autumn": {
+        "url": "ALFA祭\/2014autumn",
         "index": 10
     },
-    "CV\/2014CV": {
-        "url": "CV\/2014CV",
-        "index": 5
-    },
-    "CV\/2013CV": {
-        "url": "CV\/2013CV",
-        "index": 6
-    },
-    "CV\/2012CV": {
-        "url": "CV\/2012CV",
-        "index": 7
-    },
-    "matsuri\/2012autumn": {
-        "url": "matsuri\/2012autumn",
+    "ALFA祭\/2012autumn": {
+        "url": "ALFA祭\/2012autumn",
         "index": 13
     },
-    "recruit\/2010recruit": {
-        "url": "recruit\/2010recruit",
+    "ALFA画赛": {
+        "url": "ALFA画赛",
+        "index": 8
+    },
+    "RPG大赛": {
+        "url": "RPG大赛",
         "index": 9
     },
-    "CV\/2011CV": {
-        "url": "CV\/2011CV",
-        "index": 8
+    "作品\/resource\/ALFA祭": {
+        "url": "作品\/resource\/ALFA祭"
     },
-    "recruit\/2011recruit": {
-        "url": "recruit\/2011recruit",
-        "index": 8
+    "作品\/resource\/ALFA祭\/摊位板": {
+        "url": "作品\/resource\/ALFA祭\/摊位板"
     },
-    "recruit\/2013recruit": {
-        "url": "recruit\/2013recruit",
-        "index": 6
+    "作品\/resource\/ALFA祭\/网站横幅": {
+        "url": "作品\/resource\/ALFA祭\/网站横幅"
     },
-    "recruit\/2009recruit": {
-        "url": "recruit\/2009recruit",
-        "index": 10
+    "作品\/resource\/看板娘": {
+        "url": "作品\/resource\/看板娘"
     },
-    "event\/dump": {
-        "url": "event\/dump",
-        "index": 1
+    "作品\/resource\/ALFA祭\/摊位图": {
+        "url": "作品\/resource\/ALFA祭\/摊位图"
     },
-    "event\/2018fireflyacg": {
-        "url": "event\/2018fireflyacg",
+    "作品\/resource\/ALFA祭\/幕布": {
+        "url": "作品\/resource\/ALFA祭\/幕布"
+    },
+    "作品\/resource\/ALFA祭\/工作证": {
+        "url": "作品\/resource\/ALFA祭\/工作证"
+    },
+    "作品\/resource\/ALFA祭\/场刊": {
+        "url": "作品\/resource\/ALFA祭\/场刊"
+    },
+    "作品\/resource\/ALFA祭\/传单": {
+        "url": "作品\/resource\/ALFA祭\/传单"
+    },
+    "作品\/resource\/ALFA祭\/舞台节目表": {
+        "url": "作品\/resource\/ALFA祭\/舞台节目表"
+    },
+    "作品\/日历": {
+        "url": "作品\/日历",
         "index": 2
     },
-    "works\/cosplay": {
-        "url": "works\/cosplay"
-    },
-    "works\/cosplay\/2013-2014": {
-        "url": "works\/cosplay\/2013-2014",
+    "作品\/日历\/2003": {
+        "url": "作品\/日历\/2003",
         "index": 3
     },
-    "works\/cosplay\/2014-2015": {
-        "url": "works\/cosplay\/2014-2015",
+    "作品\/日历\/2004": {
+        "url": "作品\/日历\/2004",
         "index": 2
     },
-    "works\/cosplay\/2017-2018": {
-        "url": "works\/cosplay\/2017-2018",
+    "作品\/日历\/2005": {
+        "url": "作品\/日历\/2005",
         "index": 1
-    },
-    "works\/resource": {
-        "url": "works\/resource",
-        "hidden": true
-    },
-    "works\/resource\/banner": {
-        "url": "works\/resource\/banner"
-    },
-    "works\/resource\/LOGO": {
-        "url": "works\/resource\/LOGO"
-    },
-    "works\/resource\/publication": {
-        "url": "works\/resource\/publication"
-    },
-    "works\/resource\/card": {
-        "url": "works\/resource\/card"
-    },
-    "works\/resource\/kanban": {
-        "url": "works\/resource\/kanban"
-    },
-    "works\/resource\/curtain": {
-        "url": "works\/resource\/curtain"
-    },
-    "works\/resource\/board": {
-        "url": "works\/resource\/board"
-    },
-    "works\/resource\/map": {
-        "url": "works\/resource\/map"
-    },
-    "works\/resource\/leaflet": {
-        "url": "works\/resource\/leaflet"
-    },
-    "works\/cosplay\/2010": {
-        "url": "works\/cosplay\/2010",
-        "index": 5
-    },
-    "works\/cosplay\/2010\/bad": {
-        "hidden": true,
-        "url": "works\/cosplay\/2010\/bad"
-    },
-    "works\/cosplay\/2011": {
-        "url": "works\/cosplay\/2011",
-        "index": 4
-    },
-    "works\/resource\/RPG": {
-        "url": "works\/resource\/RPG"
     }
 }
