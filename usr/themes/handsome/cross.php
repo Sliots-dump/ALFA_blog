@@ -193,6 +193,10 @@ src="'.$itemImg.'" class="img-40px photo img-square normal-shadow"><i class="on 
                                                 $tempArray['content'] = $content;
                                                 $tempArray['month'] = $i;
                                                 array_push($timeList,$tempArray);
+
+                                                if (strpos($content,"[secret]") !== false){
+                                                    $content = "私密说说";
+                                                }
                                                 //输出到页面
                                                 echoTimeMemoryItem($i,$i,$content);
                                             }
@@ -206,7 +210,7 @@ src="'.$itemImg.'" class="img-40px photo img-square normal-shadow"><i class="on 
                             //检测是否有缓存
                             $filePath = __DIR__.'/assets/cache/time.json';
 
-                            $fp = fopen($filePath, 'r');
+                            $fp = @fopen($filePath, 'r');
                             if ($fp && filesize($filePath) > 0) {
 
                                 $contents = fread($fp, filesize($filePath));
@@ -251,11 +255,12 @@ src="'.$itemImg.'" class="img-40px photo img-square normal-shadow"><i class="on 
 	</main>
 
 <script>
+
     var timeTemple = '<div class="m-l-n-md">\n' +
         '          <a class="pull-left thumb-sm avatar">\n' +
-        '            <img src="{IMG_AVATAR}">\n' +
+        '            <img class="img-square" src="{IMG_AVATAR}">\n' +
         '          </a>          \n' +
-        '          <div class="time-machine m-l-xxl panel b-a">\n' +
+        '          <div class="time-machine m-l-xxl panel">\n' +
         '            <div class="panel-heading pos-rlt">\n' +
         '              <span class="arrow left pull-up"></span>\n' +
         '              <span class="text-muted m-l-sm pull-right">\n' +
@@ -278,55 +283,59 @@ src="'.$itemImg.'" class="img-40px photo img-square normal-shadow"><i class="on 
         // console.log(rss);
         if ('undefined' !== rss && 'undefined' !== id && flag === "false"){
             //动态加载内容
-            $.getFeed({
-                url: rss,
-                success: function(feed){
-                    $.each(feed.items,function(i,item){
+            handsome_util.addScript(LocalConst.BASE_SCRIPT_URL + "assets/js/features/jFeed.min.js","feed_js",function () {
+                $.getFeed({
+                    url: rss,
+                    success: function(feed){
+                        $.each(feed.items,function(i,item){
 
-                        var date = new Date(Date.parse(item.updated));
-                        Y = date.getFullYear() + '-';
-                        M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-                        D = date.getDate() + ' ';
-                        h = date.getHours() + ':';
-                        m = date.getMinutes();
-                        date=Y+M+D+h+m;
-                        var itemContent="";
-                        if (type!==""){
-                            if (type === "title"){
-                                itemContent = item.title;
-                            }else if (type === "description"){
-                                itemContent = item.description;
+                            var date = new Date(Date.parse(item.updated));
+                            Y = date.getFullYear() + '-';
+                            M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                            D = date.getDate() + ' ';
+                            h = date.getHours() + ':';
+                            m = date.getMinutes();
+                            date=Y+M+D+h+m;
+                            var itemContent="";
+                            if (type!==""){
+                                if (type === "title"){
+                                    itemContent = item.title;
+                                }else if (type === "description"){
+                                    itemContent = item.description;
+                                }else {
+                                    itemContent = item.description;
+                                }
                             }else {
                                 itemContent = item.description;
                             }
-                        }else {
-                            itemContent = item.description;
-                        }
-                        if (img ===""){
-                            img = "<?php $this->options->BlogPic(); ?>";
-                        }
-                        if (date === "NaN-NaN-NaN NaN:NaN"){
-                            date = "";
-                        }
-                        var content=timeTemple.
-                        replace("{TIME}",date).
-                        replace("{CONTENT}",itemContent).
-                        replace("{LINK}",item.link).
-                        replace("{IMG_AVATAR}",img);
+                            if (img ===""){
+                                img = "<?php $this->options->BlogPic(); ?>";
+                            }
+                            if (date === "NaN-NaN-NaN NaN:NaN"){
+                                date = "";
+                            }
+                            var content=timeTemple.
+                            replace("{TIME}",date).
+                            replace("{CONTENT}",itemContent).
+                            replace("{LINK}",item.link).
+                            replace("{IMG_AVATAR}",img);
 
 
-                        $("#"+id).find(".comment-list").append(content);
-                        $("#"+id).find(".streamline").removeClass("hide");
+                            $("#"+id).find(".comment-list").append(content);
+                            $("#"+id).find(".streamline").removeClass("hide");
+                            $("#"+id).find(".loading-nav").addClass("hide");
+                            object.attr("data-status","true");
+
+                            /*lightGallery  */
+                            handsome_content.seFancyBox();
+
+                        });
+                    },
+                    error: function (feed) {
                         $("#"+id).find(".loading-nav").addClass("hide");
-                        object.attr("data-status","true");
-                        window['Page'].seFancyBox();
-
-                    });
-                },
-                error: function (feed) {
-                    $("#"+id).find(".loading-nav").addClass("hide");
-                    $("#"+id).find(".error-nav").removeClass("hide");
-                }
+                        $("#"+id).find(".error-nav").removeClass("hide");
+                    }
+                });
             });
         }
     });
@@ -362,8 +371,11 @@ src="'.$itemImg.'" class="img-40px photo img-square normal-shadow"><i class="on 
             var content = new FormData();
             content.append("action","upload_img");
             content.append("file",data);
+            content.append("time_code",'<?php echo md5($this->options->time_code) ?>');
+
             content.append("suffix",suffix);
 
+            
             $.ajax({
                 url: "?action=upload_img",
                 type: 'post',

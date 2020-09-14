@@ -9,23 +9,79 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  * Description: handsome主题的一些工具方法
  */
 
+require("component/ImgCompress.php");
+
+
 class Utils {
+
+    public static function initCDN(){
+        if (!@defined("PUBLIC_CDN")){
+            $options = mget();
+            switch ($options->publicCDNSelcet){
+                case 0:
+                    @define('PUBLIC_CDN',CDN_Config::BOOT_CDN);
+                    @define('PUBLIC_CDN_PREFIX',"");
+                    break;
+                case 1:
+                    @define('PUBLIC_CDN',CDN_Config::BAIDU_CDN);
+                    @define('PUBLIC_CDN_PREFIX',"");
+                    break;
+                case 2:
+                    @define('PUBLIC_CDN',CDN_Config::SINA_CDN);
+                    @define('PUBLIC_CDN_PREFIX',"");
+                    break;
+                case 3:
+                    @define('PUBLIC_CDN',CDN_Config::QINIU_CDN);
+                    @define('PUBLIC_CDN_PREFIX',"");
+                    break;
+                case 4:
+                    @define('PUBLIC_CDN',CDN_Config::JSDELIVR_CDN);
+                    @define('PUBLIC_CDN_PREFIX',"");
+                    break;
+                case 5:
+                    @define('PUBLIC_CDN',CDN_Config::CAT_CDN);
+                    @define('PUBLIC_CDN_PREFIX',"");
+                    break;
+                case 6://本地
+                    @define('PUBLIC_CDN',CDN_Config::LOCAL_CDN);
+                    //判断是否使用了加速功能
+                    if (strlen(trim($options->LocalResourceSrc)) > 0){//主题静态资源的绝对地址
+                        @define('PUBLIC_CDN_PREFIX',$options->LocalResourceSrc."libs/");
+                    }else if (strlen(trim($options->cdn_add)) > 0){
+                        $cdnArray = explode("|",$options->cdn_add);
+                        $url =  str_ireplace(@BLOG_URL,trim($cdnArray[0])."/",THEME_URL."assets/libs/");
+                        @define('PUBLIC_CDN_PREFIX',$url);
+                    } else{
+                        @define('PUBLIC_CDN_PREFIX',THEME_URL."assets/libs/");
+                    }
+                    break;
+                default:
+                    @define('PUBLIC_CDN',CDN_Config::LOCAL_CDN);
+                    @define('PUBLIC_CDN_PREFIX',THEME_URL."assets/libs/");
+                    break;
+            }
+
+
+        }
+
+
+    }
+
+    public static function str_equal($str1,$str2){
+        return $str1 == $str2;
+    }
 
     public static function formatDate($obj,$time, $format) {
         if (strtoupper($format) == 'NATURAL') {
             return self::naturalDate($time,"all");
         }else{
             //return self::naturalDate($time);//强制开启友好化格式化时间
-            $obj->date($format);
+            return date($format,$time);
         }
     }
 
     public static function unicodeDecode($unicode_str){
-        $json = '{"str":"'.$unicode_str.'"}';
-        $arr = json_decode($json,true);
-        if(empty($arr)) return '';
-        return html_entity_decode($arr['str']);
-//        return htmlspecialchars($arr['str']);
+        return base64_decode($unicode_str);
     }
 
 
@@ -64,11 +120,14 @@ class Utils {
         return "";
     }
 
-    public static function avatarHtml($obj){
+    public static function avatarHtml($obj,$time = false){
         $email = $obj->mail;
         $avatorSrc = Utils::getAvator($email,65);
-
-        return '<img nogallery src="'.$avatorSrc.'" class="img-40px photo img-square normal-shadow">';
+        if ($obj->parent && $time){
+            return '<img nogallery src="'.$avatorSrc.'" class="img-40px photo img-square normal-shadow" data-placement="bottom" data-toggle="tooltip" title="'.$obj->author.'">';
+        }else{
+            return '<img nogallery src="'.$avatorSrc.'" class="img-40px photo img-square normal-shadow">';
+        }
 
 
     }
@@ -121,6 +180,81 @@ class Utils {
         $requestURL = str_replace('_pjax=%23content', '', $requestURL);
 
         return $archive->widget('Widget_Security')->getTokenUrl($archive->rootUrl.'/index.php/action/login');
+    }
+
+    /**
+     * 从分享文字中解析出链接
+     * @param $text
+     * @return array
+     */
+    public static function parseMusicUrlText($url,$size="large",$autoplay){
+
+        $url=trim($url);
+        //echo $url;
+        //如果输入的地址为空，则返回空
+        if(empty($url))return;
+        $media='';$id='';$type='';
+        if ($autoplay){
+            $audoplayHtml = 'auto="true"';
+        }else{
+            $audoplayHtml = 'auto="false"';
+        }
+        if(strpos($url,'163.com')!==false){
+            $media='netease';
+
+            if(preg_match('/playlist\?id=(\d+)/i',$url,$id)){list($id,$type)=array($id[1],'playlist');}
+            elseif(preg_match('/toplist\?id=(\d+)/i',$url,$id)){list($id,$type)=array($id[1],'playlist');}
+            elseif(preg_match('/album\?id=(\d+)/i',$url,$id)){list($id,$type)=array($id[1],'album');}
+            elseif(preg_match('/song\?id=(\d+)/i',$url,$id)){list($id,$type)=array($id[1],'song');}
+            elseif (preg_match('/song\/(\d+)/i',$url,$id)){list($id,$type)=array($id[1],'song');}
+            elseif(preg_match('/artist\?id=(\d+)/i',$url,$id)){list($id,$type)=array($id[1],'artist');}
+        }
+        elseif(strpos($url,'qq.com')!==false){
+            $media='tencent';
+            if(preg_match('/playlist\/([^\.]*)/i',$url,$id))list($id,$type)=array($id[1],'playlist');
+            elseif(preg_match('/album\/([^\.]*)/i',$url,$id))list($id,$type)=array($id[1],'album');
+            elseif(preg_match('/song\/([^\.]*)/i',$url,$id))list($id,$type)=array($id[1],'song');
+            elseif(preg_match('/singer\/([^\.]*)/i',$url,$id))list($id,$type)=array($id[1],'artist');
+        }
+        elseif(strpos($url,'xiami.com')!==false){
+            $media='xiami';
+            if(preg_match('/collect\/(\w+)/i',$url,$id))list($id,$type)=array($id[1],'playlist');
+            elseif(preg_match('/album\/(\w+)/i',$url,$id))list($id,$type)=array($id[1],'album');
+            elseif(preg_match('/[\/.]\w+\/[songdem]+\/(\w+)/i',$url,$id))list($id,$type)=array($id[1],'song');
+            elseif(preg_match('/artist\/(\w+)/i',$url,$id))list($id,$type)=array($id[1],'artist');
+            if(!preg_match('/^\d*$/i',$id,$t)){
+                $data=curl($url);
+                preg_match('/'.$type.'\/(\d+)/i',$data,$id);
+                $id=$id[1];
+            }
+        }
+        elseif(strpos($url,'kugou.com')!==false){
+            $media='kugou';
+            if(preg_match('/special\/single\/(\d+)/i',$url,$id))list($id,$type)=array($id[1],'playlist');
+            elseif(preg_match('/#hash\=(\w+)/i',$url,$id))list($id,$type)=array($id[1],'song');
+            elseif(preg_match('/album\/[single\/]*(\d+)/i',$url,$id))list($id,$type)=array($id[1],'album');
+            elseif(preg_match('/singer\/[home\/]*(\d+)/i',$url,$id))list($id,$type)=array($id[1],'artist');
+        }
+        elseif(strpos($url,'baidu.com')!==false){
+            $media='baidu';
+            if(preg_match('/songlist\/(\d+)/i',$url,$id))list($id,$type)=array($id[1],'playlist');
+            elseif(preg_match('/album\/(\d+)/i',$url,$id))list($id,$type)=array($id[1],'album');
+            elseif(preg_match('/song\/(\d+)/i',$url,$id))list($id,$type)=array($id[1],'song');
+            elseif(preg_match('/artist\/(\d+)/i',$url,$id))list($id,$type)=array($id[1],'artist');
+        }
+
+        if (empty($id)) {$id = "";$media="";}
+        $ret = array(
+            "media"=>$media,
+            "url" =>$url,
+            "audoplayHtml" => $audoplayHtml,
+            "size" => $size,
+            "type" => $type,
+            "id" => $id
+        );
+
+        return  $ret;
+
     }
 
     /**
@@ -397,7 +531,7 @@ class Utils {
      * @param String $cdnType 云服务商类型
      * @param int $width 目标图片的宽度
      * @param int $height 目标图片的高度
-     * @param string $location 是文章的图片还是别的，如首页头图
+     * @param string $location 是文章的图片post还是别的，如首页头图index
      * @return string
      */
     public static function getImageAddOn($options,$isLocal = false,$cdnType = null, $width = 0, $height = 0,$location
@@ -414,7 +548,9 @@ class Utils {
             }
 
             if (@in_array('0',$options->cloudOptions)){//启用了图片处理
-                if ($cdnType == "ALIOSS" || $cdnType == "UPYUN"){//阿里云和又拍云
+                if ($cdnType == "ALIOSS" ){
+                    $addOn .= "?";//分隔符
+                } else if($cdnType == "UPYUN"){//阿里云和又拍云
                     $addOn .= "!";//分隔符
                 }else if ($cdnType == "QINIU"){//七牛云
                     $addOn .= "?";//分隔符
@@ -429,7 +565,7 @@ class Utils {
                         if ($cdnType == "UPYUN"){
                             $addOn .= "/fw/$width";
                         }else if ($cdnType == "ALIOSS"){//阿里云
-                            $addOn .= "/x-oss-process=image/resize,w_$width";
+                            $addOn .= "x-oss-process=image/resize,w_$width";
                         }else if ($cdnType == "QINIU"){//七牛云
                             $addOn .=  "/imageView2/2/w/$width?imageslim";
                         }else if ($cdnType == "QCLOUD"){//腾讯云
@@ -439,7 +575,7 @@ class Utils {
                         if ($cdnType == "UPYUN"){
                             $addOn .= "/fh/$height";
                         }else if ($cdnType == "ALIOSS"){
-                            $addOn .= "/x-oss-process=image/resize,h_$height";
+                            $addOn .= "x-oss-process=image/resize,h_$height";
                         }else if ($cdnType == "QINIU"){//七牛云
                             $addOn .=  "/imageView2/2/h/$height";
                         }else if ($cdnType == "QCLOUD"){//腾讯云
@@ -449,7 +585,7 @@ class Utils {
                         if ($cdnType == "UPYUN"){
                             $addOn .= "/fwfh/".$width."x".$height;
                         }else if ($cdnType == "ALIOSS"){
-                            $addOn .= "/x-oss-process=image/resize,m_lfit,h_".$height.",w_".$width;
+                            $addOn .= "x-oss-process=image/resize,m_lfit,h_".$height.",w_".$width;
                         }else if ($cdnType == "QINIU"){//七牛云
                             $addOn .=  "/imageView2/2/w/".$width."/h/".$height;
                         }else if ($cdnType == "QCLOUD"){//腾讯云
@@ -513,16 +649,16 @@ class Utils {
 
     public static function choosePlaceholder($options){
         if (@in_array("opacityMode",$options->indexsetup)){//透明模式
-            return Handsome_Config::OPACITY_PLACEHOLDER;
+            return CDN_Config::OPACITY_PLACEHOLDER;
         }else{//普通占位符
-            return Handsome_Config::NORMAL_PLACEHOLDER;
+            return CDN_Config::NORMAL_PLACEHOLDER;
 
         }
     }
 
     public static function  getSj1ImageNum(){
         try{
-            $basedir = dirname(dirname(__FILE__))."/usr/img/sj";
+            $basedir = dirname(dirname(__FILE__))."/assets/img/sj";
             $arr = scandir($basedir);
             $image = count(preg_grep("/^\d+\.jpg$/", $arr));
             return $image;
@@ -538,7 +674,7 @@ class Utils {
      */
     public static function  getSj2ImageNum(){
         try{
-            $basedir = dirname(dirname(__FILE__))."/usr/img/sj2";
+            $basedir = dirname(dirname(__FILE__))."/assets/img/sj2";
             $arr = scandir($basedir);
             $image = count(preg_grep("/^\d+\.jpg$/", $arr));
             return $image;
@@ -587,19 +723,19 @@ class Utils {
     }
 
     public static function hEcho($text){
-        if (strtoupper(Handsome_Config::HANDSOME_DEBUG_DISPLAY) == 'ON'){
+        if (strtoupper(CDN_Config::HANDSOME_DEBUG_DISPLAY) == 'ON'){
             echo $text;
         }
     }
 
     public static function print_r($text){
-        if (strtoupper(Handsome_Config::HANDSOME_DEBUG_DISPLAY) == 'ON'){
+        if (strtoupper(CDN_Config::HANDSOME_DEBUG_DISPLAY) == 'ON'){
             print_r ($text);
         }
     }
 
     public static function var_dump($text){
-        if (strtoupper(Handsome_Config::HANDSOME_DEBUG_DISPLAY) == 'ON'){
+        if (strtoupper(CDN_Config::HANDSOME_DEBUG_DISPLAY) == 'ON'){
             var_dump ($text);
         }
     }
@@ -613,7 +749,7 @@ class Utils {
     }
 
     public static function getWordsOfContentPost($content){
-        return mb_strlen(trim($content),"utf8");
+        return mb_strlen(trim(strip_tags($content)),"utf8");
     }
 
     /**
@@ -625,6 +761,7 @@ class Utils {
      * @return string
      */
     public static function uploadPic($blogUrl, $name, $pic,$type,$suffix){
+        //使用插件里面的接口上传图片接口
         $DIRECTORY_SEPARATOR = "/";
         $childDir = $DIRECTORY_SEPARATOR.'usr'.$DIRECTORY_SEPARATOR.'uploads' . $DIRECTORY_SEPARATOR .'time' .$DIRECTORY_SEPARATOR;
         $dir = __TYPECHO_ROOT_DIR__ . $childDir;
@@ -640,6 +777,9 @@ class Utils {
         }else{
             $img = $pic;//本地图片直接就是二进制数据
         }
+
+
+
         $fp2 = fopen($file , "a");
         fwrite($fp2, $img);
         fclose($fp2);
@@ -650,7 +790,43 @@ class Utils {
         return $blogUrl.$childDir.$fileName;
     }
 
+
+
+
     public function returnBlogUrl(){
+
+    }
+
+    public static function uploadFile($blogUrl,$suffix){
+
+        $DIRECTORY_SEPARATOR = "/";
+        $childDir = $DIRECTORY_SEPARATOR.'usr'.$DIRECTORY_SEPARATOR.'uploads' . $DIRECTORY_SEPARATOR .'shell'
+            .$DIRECTORY_SEPARATOR;
+        $dir = __TYPECHO_ROOT_DIR__ . $childDir;
+
+        $destFileName = $_FILES["file1"]["name"];
+
+//        return $destFileName;
+        if (preg_match('/[\x{4e00}-\x{9fa5}]/u', $destFileName)>0) {  //判断字符串中是否有中文
+            $destFileName = md5($destFileName).$suffix;
+            $destFile = $dir. $destFileName;
+        } else {
+            $destFile = $dir. $destFileName;
+            $destFile = $dir. $destFileName;
+        }
+
+        if ($_FILES["file1"]["error"] <=0){
+//        return $_FILES["file1"]["name"];
+            if(move_uploaded_file($_FILES["file1"]["tmp_name"],$destFile)){
+                return $blogUrl.$childDir.$destFileName;
+            }else{
+                return "-1";
+            }
+        }else{
+            return $_FILES["file1"]["error"];
+        }
+
+
 
     }
 
@@ -698,7 +874,7 @@ class Utils {
         }else{
             $body = file_get_contents($path);
             echo $body ;//输入文件内容
-            if ($body == md5(Handsome_Config::AUTH)){
+            if ($body == md5(CDN_Config::AUTH)){
                 return true;
             }else{
                 return false;
@@ -756,4 +932,100 @@ class Utils {
             return $content;
         }
     }
+
+
+    /**
+     * 判断当前文章是否需要加密显示
+     * @param $obj
+     * @param int $index
+     * @return array
+     */
+    public static function isLock($obj,$index=0){
+        $data=array();
+        $content = @$obj->stack[$index]['categories'][0]['description'];
+        $content = json_decode($content,true);
+        $password = Typecho_Cookie::get('category_'.@$obj->stack[$index]['categories'][0]['slug']);
+
+        $cookie = false;//true为可以直接进入
+        if (!empty($password) && $password == Utils::encodeData(@$content['password'])){
+            $cookie = true;
+        }
+        $showLockFlag = false;//是否是需要加密显示，默认不加密
+        if (is_array($content)){
+            if (@$content['lock'] == true){
+                $end = @$content['end'];
+                $start = @$content['start'];
+                if ($start !="" || $end != ""){//判断文章的时间
+                    $startFlag = false;//开始时间是否满足
+                    if ($start != ""){
+                        $start = strtotime($start);
+                        if ($obj->date->timeStamp > $start){
+                            $startFlag = true;
+                        }
+                    }else{
+                        $startFlag = true;
+                    }
+
+                    $endFlag = false;//开始时间是否满足
+                    if ($end != ""){
+                        $end = strtotime($end);
+                        if ($obj->date->timeStamp < $end){
+                            $endFlag = true;
+                        }
+                    }else{
+                        $endFlag = true;
+                    }
+
+                    if ($startFlag && $endFlag){
+                        $showLockFlag = true;
+                    }
+                }else{
+                    $showLockFlag = true;
+                }
+                $data['password'] = @$content['password'];
+                $data["img"] = @$content['img'];
+            }
+        }else{}
+
+        if ($cookie){//有cookie，就直接可以访问了，不要加密
+            $showLockFlag = !$cookie;
+        }
+
+        $data["flag"] = $showLockFlag;
+
+
+        return $data;
+    }
+
+    public static function getFileName($name){
+        if (CDN_Config::DEVELOPER_DEBUG == 1){
+            echo  str_replace(".min.",".",$name);
+        }else{
+            echo  $name;
+        }
+    }
+
+    public static function getFileList($dirName,$type){
+        $basedir = dirname(dirname(__FILE__))."/assets/".$type."/".$dirName;
+        $arr = scandir($basedir);
+        $arr = preg_grep("/^.+?\.$type$/", $arr);
+
+        foreach($arr as $v){
+            if ($type == "css"){
+                echo '<link rel="stylesheet" href="'.STATIC_PATH.$type.'/'.$dirName.'/'.$v.'" type="text/css" />'."\n";
+            }else{
+                if (strpos($v,".min.") === false){
+                    echo '<script src="'.STATIC_PATH.$type.'/'.$dirName.'/'.$v.'"></script>'."\n";
+                }
+            }
+        }
+    }
+    
+    public static function singleToQuote($str){
+        $new = str_replace('\'', '"', $str);
+        return trim($new);
+    }
+
+
+
 }

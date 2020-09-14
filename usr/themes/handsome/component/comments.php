@@ -25,7 +25,7 @@
         if ($comments->authorId) {
             if ($comments->authorId == $comments->ownerId) {
                 $commentClass .= ' comment-by-author';  //如果是文章作者的评论添加 .comment-by-author 样式
-                $Identity = '<label class="label bg-dark m-l-xs">'._mt("作者").'</label>';
+                $Identity = '<label data-toggle="tooltip" data-placement="right" title="'._mt("作者").'" class="label comment-author-logo m-l-xs"><span><i data-feather="zap"></i></span></label>';
             } else {
                 $commentClass .= ' comment-by-user';  //如果是评论作者的添加 .comment-by-user 样式
                 //$Identity = '<label class="label bg-dark m-l-xs">'._mt("用户").'</label>';
@@ -37,7 +37,8 @@
 
         $depth = $comments->levels +1; //添加的一句
         if ($comments->url) {
-            $author = '<a href="' . $comments->url . '"target="_blank"' . ' rel="external nofollow">' . $comments->author . '</a>';
+            $author = '<a href="' . $comments->url . '"target="_blank"' . ' rel="external nofollow">' .
+                $comments->author . '</a>';
         } else {
             $author = $comments->author;
         }
@@ -63,11 +64,13 @@
 
                 <a class="pull-left thumb-sm" rel="nofollow">
                     <?php echo Utils::avatarHtml($comments); ?>
+                    <?php echo $Identity; ?>
+
                 </a>
                 <div class="m-b m-l-xxl">
                     <div class="comment-meta">
             <span class="comment-author vcard">
-              <b class="fn"><?php echo $author; ?></b><?php echo $Identity; ?>
+              <b class="fn"><?php echo $author; ?></b>
               </span>
                         <div class="comment-metadata">
                             <time class="format_time text-muted text-xs block m-t-xs" pubdate="pubdate" datetime="<?php $comments->date('c'); ?>"><?php echo Utils::formatDate($comments,$comments->created, $options->dateFormat); ?></time>
@@ -110,7 +113,7 @@
             <div id="<?php $this->respondId(); ?>" class="respond comment-respond no-borders">
 
                 <h4 id="reply-title" class="comment-reply-title m-t-lg m-b"><?php _me("发表评论") ?>
-                    <small><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="<?php
+                    <small><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="right" title="<?php
                         $tip = $this->options->commentTips;
                         if (trim($tip) == ""){
                             $tip = _mt("使用cookie技术保留您的个人信息以便您下次快速评论，继续评论表示您已同意该条款");
@@ -123,11 +126,13 @@
                     </small>
                 </h4>
                 <form id="comment_form" method="post" action="<?php $this->commentUrl() ?>"  class="comment-form" role="form">
+                    <input type="hidden" name="receiveMail" id="receiveMail" value="yes" />
                     <div class="comment-form-comment form-group">
                         <label class="padder-v-sm" for="comment"><?php _me("评论") ?>
                             <span class="required text-danger">*</span></label>
                         <textarea id="comment" class="textarea form-control OwO-textarea" name="text" rows="5" placeholder="<?php _me("说点什么吧……") ?>" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};"><?php $this->remember('text'); ?></textarea>
                         <div class="OwO padder-v-sm"></div>
+                        <?php $options = mget(); if (in_array('ajaxComment', $options->featuresetup)): ?>
                         <div class="secret_comment" id="secret_comment" data-toggle="tooltip"
                         data-original-title="<?php _me("开启该功能，您的评论仅作者和评论双方可见") ?>">
                             <label class="secret_comment_label control-label"><?php _me("私密评论") ?></label>
@@ -138,6 +143,7 @@
                                 </label>
                             </div>
                         </div>
+                        <?php endif; ?>
                     </div>
                     <!--判断是否登录-->
                     <?php if($this->user->hasLogin()): ?>
@@ -145,7 +151,7 @@
                             $this->options->profileUrl(); ?>"><?php $this->user->screenName(); ?></a>&nbsp;<?php _me("归来") ?>！&nbsp;<a href="<?php $this->options->logoutUrl(); ?>" id="logoutIn" title="Logout"><?php _me("退出") ?>&raquo;</a></p>
                     <?php else : ?>
                     <?php if($this->remember('author',true) != "" && $this->remember('mail',true) != "") : ?>
-                    <p><?php _me("欢迎") ?>&nbsp;<a class="show_hide_div" style="color: #333!important;" data-toggle="tooltip" title="点击修改信息"><?php $this->remember('author'); ?></a>&nbsp;<?php _me("归来") ?>！</p>
+                    <p><?php _me("欢迎") ?>&nbsp;<a class="show_hide_div" data-toggle="tooltip" title="点击修改信息"><?php $this->remember('author'); ?></a>&nbsp;<?php _me("归来") ?>！</p>
                     <div id="author_info" class="hide">
                         <?php else : ?>
                         <div id="author_info" class="row row-sm">
@@ -162,10 +168,12 @@
 
                             <div class="comment-form-email form-group col-sm-6 col-md-4">
                                 <label for="email"><?php _me("邮箱") ?>
+                                    <?php if( $this->options->commentsRequireMail):?>
                                     <span class="required text-danger">*</span>
+                                    <?php endif; ?>
                                 </label>
-                                <input type="text" name="mail" id="mail" class="form-control" placeholder="<?php _me("邮箱 (必填,将保密)") ?>" value="<?php $this->remember('mail'); ?>" />
-                                <input type="hidden" name="receiveMail" id="receiveMail" value="yes" />
+                                <input type="text" name="mail" id="mail" class="form-control" placeholder="<?php if( $this->options->commentsRequireMail) _me
+                                ("邮箱 (必填,将保密)");else _me("邮箱（选填,将保密）") ?>" value="<?php $this->remember('mail'); ?>" />
                             </div>
 
                             <div class="comment-form-url form-group col-sm-12 col-md-4">

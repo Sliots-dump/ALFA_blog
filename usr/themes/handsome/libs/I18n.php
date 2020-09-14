@@ -106,7 +106,7 @@ class I18n{
         if (file_exists($file)) {
             $className = str_replace('/', '_', $path) . '_' . $locale;
             if (!class_exists($className)) {
-                require_once($file);
+                require($file);
             }
             if (class_exists($className)) {
                 $lang = new $className();
@@ -223,7 +223,7 @@ class I18n_Options{
                     //echo "   " . $className . '<br />';
                     if (!class_exists($className)) {//如果找不到该类名称，则将该类对应的class文件引进
                         //echo "yes ";
-                        require_once($file);
+                        require($file);
                     }
 
                     if(class_exists($className)){

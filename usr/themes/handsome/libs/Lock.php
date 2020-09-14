@@ -15,53 +15,19 @@ $options = Typecho_Widget::widget('Widget_Options');
 ?>
 <?php
 
-require_once("Settings.php");
-require_once("I18n.php");
-require_once("Handsome.php");
-require_once("Lang.php");
-require_once("Content.php");
-require_once("Utils.php");
-require_once("Config.php");
+//require("Settings.php");
+//require("I18n.php");
+//require("Preference.php");
+//require("Lang.php");
+//require("Content.php");
+//require("Utils.php");
+//require("CDN.php");
 
 if (!defined('THEME_URL')){//主题目录的绝对地址
     define("THEME_URL", rtrim(preg_replace('/^'.preg_quote($options->siteUrl, '/').'/', $options->rootUrl.'/', $options->themeUrl, 1),'/').'/');
 }
 
-switch ($options->publicCDNSelcet){
-    case 0:
-        @define('PUBLIC_CDN',serialize(Handsome_Config::$BOOT_CDN));
-        @define('PUBLIC_CDN_PREFIX',"");
-        break;
-    case 1:
-        @define('PUBLIC_CDN',serialize(Handsome_Config::$BAIDU_CDN));
-        @define('PUBLIC_CDN_PREFIX',"");
-        break;
-    case 2:
-        @define('PUBLIC_CDN',serialize(Handsome_Config::$SINA_CDN));
-        @define('PUBLIC_CDN_PREFIX',"");
-        break;
-    case 3:
-        @define('PUBLIC_CDN',serialize(Handsome_Config::$QINIU_CDN));
-        @define('PUBLIC_CDN_PREFIX',"");
-        break;
-    case 4:
-        @define('PUBLIC_CDN',serialize(Handsome_Config::$JSDELIVR_CDN));
-        @define('PUBLIC_CDN_PREFIX',"");
-        break;
-    case 5:
-        @define('PUBLIC_CDN',serialize(Handsome_Config::$CAT_CDN));
-        @define('PUBLIC_CDN_PREFIX',"");
-        break;
-    case 6:
-        @define('PUBLIC_CDN',serialize(Handsome_Config::$LOCAL_CDN));
-        @define('PUBLIC_CDN_PREFIX',THEME_URL."assets/libs/");
-        break;
-    default:
-        @define('PUBLIC_CDN',serialize(Handsome_Config::$LOCAL_CDN));
-        @define('PUBLIC_CDN_PREFIX',THEME_URL."assets/libs/");
-        break;
-}
-
+Utils::initCDN();
 
 if (strlen(trim($options->LocalResourceSrc)) > 0){//主题静态资源的绝对地址
     @define('STATIC_PATH',$options->LocalResourceSrc);
@@ -101,20 +67,22 @@ if (!defined("BLOG_URL")){
 
 
     <!-- 第三方CDN加载CSS -->
-    <?php $PUBLIC_CDN_ARRAY = unserialize(PUBLIC_CDN); ?>
+    <?php $PUBLIC_CDN_ARRAY = json_decode(PUBLIC_CDN,true); ?>
     <link href="<?php echo PUBLIC_CDN_PREFIX.$PUBLIC_CDN_ARRAY['css']['bootstrap'] ?>" rel="stylesheet">
 
 
     <!-- 本地css静态资源 -->
-    <link rel="stylesheet" href="<?php echo STATIC_PATH; ?>css/function.min.css?v=<?php echo Handsome::$version.Handsome_Config::$versionTag ?>" type="text/css" />
-    <link rel="stylesheet" href="<?php echo STATIC_PATH; ?>css/handsome.min.css?v=<?php echo Handsome::$version.Handsome_Config::$versionTag ?>" type="text/css" />
+    <link rel="stylesheet" href="<?php echo STATIC_PATH; ?>css/origin/function.min.css?v=<?php echo Handsome::version
+        .Handsome::$versionTag ?>" type="text/css" />
+    <link rel="stylesheet" href="<?php echo STATIC_PATH; ?>css/handsome.min.css?v=<?php echo Handsome::version.Handsome::$versionTag ?>" type="text/css" />
 
 
 
     <!--引入英文字体文件-->
     <?php if (!empty($this->options->featuresetup) && in_array('laodthefont', $this->options->featuresetup)): ?>
-        <link rel="stylesheet" href="<?php echo STATIC_PATH; ?>css/font.min.css?v=<?php echo Handsome::$version
-            .Handsome_Config::$versionTag ?>" type="text/css" />
+        <link rel="stylesheet preload" href="<?php echo STATIC_PATH; ?>css/features/font.min.css?v=<?php echo
+            Handsome::version
+            .Handsome::$versionTag ?>" type="text/css" />
     <?php endif; ?>
 
     <style type="text/css">
@@ -187,7 +155,7 @@ if (!defined("BLOG_URL")){
 
     $('.open_new_world').click(function () {
         var ele = $(this);
-        $.get(LocalConst.BLOG_URL,{action:"open_world", password:$('.open_new_world_password').val(), md5:LocalConst
+        $.get(window.location.href,{action:"open_world", password:$('.open_new_world_password').val(), md5:LocalConst
                 .MD5,type: LocalConst.TYPE, category: LocalConst.CATEGORY})
             .error(function(){
                 $.message({
@@ -196,6 +164,8 @@ if (!defined("BLOG_URL")){
                     type:'warning'
                 })
             }).success(function(data) {
+            data = JSON.parse(data).status;
+            console.log(data);
             if (data === "1"){//密码正确
                 $.message({
                     title:LocalConst.OPERATION_NOTICE,
@@ -229,7 +199,7 @@ if (!defined("BLOG_URL")){
         while (Date.now - t <= d) {}
     }
 </script>
-<script src="<?php echo STATIC_PATH ?>js/function.min.js?v=<?php echo Handsome::$version.Handsome_Config::$versionTag
+<script src="<?php echo STATIC_PATH ?>js/function.min.js?v=<?php echo Handsome::version.Handsome::$versionTag
 ?>"></script>
 
 </body>

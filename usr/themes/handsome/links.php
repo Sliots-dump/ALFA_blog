@@ -16,6 +16,7 @@ $this->need('component/header.php');
 	<!-- / aside -->
 
 <!-- <div id="content" class="app-content"> -->
+    <a class="off-screen-toggle hide"></a>
     <main class="app-content-body <?php Content::returnPageAnimateClass($this); ?>">
     <div class="hbox hbox-auto-xs hbox-auto-sm">
         <div class="bg-light lter wrapper-md">
@@ -39,8 +40,8 @@ $this->need('component/header.php');
                 <div class="tab-content">
                     <!-- list -->
                     <div id="my-info" class="tab-pane fade in active">
-                        <div class="wrapper ng-binding">
-                            <?php echo Content::postContent($this,$this->user->hasLogin()); ?>
+                        <div class="wrapper ng-binding" id="post-content">
+                            <?php Content::postContentHtml($this,$this->user->hasLogin()); ?>
                             <!--评论-->
                             <div class="bg-white wrapper border-radius-6">
                                 <?php $this->need('component/comments.php') ?>
@@ -48,45 +49,10 @@ $this->need('component/header.php');
                         </div>
                     </div>
 
-                    <div class="tab-pane fade in" id="tab_2">
-                        <div class="list-group list-group-lg list-group-sp">
-                            <?php
-                            $mypattern = <<<eof
-  <a href="{url}" target="_blank" class="list-group-item no-borders box-shadow-wrap-lg"> <span class="pull-left 
-  thumb-sm avatar m-r"> <img 
-  src={image} alt="Error" /> <i class="{color} right"></i> </span> <span class="clear"> <span>{name}</span> <small class="text-muted clear text-ellipsis">{title}</small> </span> </a>
-eof;
-                            Handsome_Plugin::output($mypattern, 0, "one");
-                            ?>
-                        </div>
-                    </div>
+                    <?php echo Content::returnLinkList("one","tab_2"); ?>
+                    <?php echo Content::returnLinkList("good","tab_3"); ?>
+                    <?php echo Content::returnLinkList("ten","tab_4"); ?>
 
-                    <div class="tab-pane fade in" id="tab_3">
-                        <div class="list-group list-group-lg list-group-sp">
-                            <?php
-                            $mypattern = <<<eof
-                            
-  <a href="{url}" target="_blank" class="list-group-item no-borders box-shadow-wrap-lg"> <span class="pull-left thumb-sm avatar m-r"> <img 
-  src={image} alt="Error" /> <i class="{color} right"></i> </span> <span class="clear"> <span class="text-muted">{name}</span> <small class="text-muted clear text-ellipsis">{title}</small> </span> </a>
-eof;
-                            Handsome_Plugin::output($mypattern, 0, "good");
-                            ?>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade in" id="tab_4">
-                        <div class="list-group list-group-lg list-group-sp">
-                            <?php
-                            $mypattern = <<<eof
-                            
-  <a href="{url}" target="_blank" class="list-group-item no-borders box-shadow-wrap-lg"> <span class="pull-left 
-  thumb-sm avatar m-r"> <img src={image} alt="Error" /> <i class="{color} right"></i> </span> <span class="clear"> <span
-   class="text-muted">{name}</span> <small class="text-muted clear text-ellipsis">{title}</small> </span> </a>
-eof;
-                            Handsome_Plugin::output($mypattern, 0, "ten");
-                            ?>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

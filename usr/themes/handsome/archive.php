@@ -27,7 +27,7 @@ $data['img'] = @$content['img'];
 
 
 $_GET['data']=$data;
-require_once('libs/Lock.php'); ?>
+require('libs/Lock.php'); ?>
 
 <?php else: ?>
 

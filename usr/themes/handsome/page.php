@@ -23,9 +23,9 @@
             <?php echo Content::exportHeaderImg($this); ?>
          <!--文章内容-->
          <div id="post-content" class="wrapper-lg">
-          <div class="entry-content l-h-2x">
-              <?php echo Content::postContent($this,$this->user->hasLogin()); ?>
-          </div>
+             <?php Content::postContentHtml($this,
+                 $this->user->hasLogin()); ?>
+             
              <?php Content::pageFooter($this->options) ?>
          </div>
         </article>
@@ -38,18 +38,6 @@
     <?php $this->need('component/sidebar.php'); ?>
      <!--文章右侧边栏结束-->
     </div>
-       <script>
-           try {
-               $("[data-morphing]").fancyMorph({
-                   hash : 'morphing'
-               });
-           }catch (e){
-
-           }
-           <?php if ((@in_array('autoReadMode',$this->options->featuresetup))): ?>
-                $("#morphing").click();
-           <?php endif; ?>
-       </script>
    </main>
 <?php echo Content::returnReadModeContent($this,$this->user->hasLogin()); ?>
 

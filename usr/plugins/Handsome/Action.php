@@ -1,4 +1,5 @@
 <?php
+require ("MultiUpload.php");
 class Handsome_Action extends Typecho_Widget implements Widget_Interface_Do
 {
 	private $db;
@@ -104,6 +105,18 @@ class Handsome_Action extends Typecho_Widget implements Widget_Interface_Do
         }
     }
 
+
+    public function uploadfile()
+    {
+        if ( class_exists("Handsome_Upload")) {
+            $reflectionWidget =  new ReflectionClass("Handsome_Upload");
+            if ($reflectionWidget->implementsInterface('Widget_Interface_Do')) {
+                $this->widget("Handsome_Upload")->action();
+                return;
+            }
+        }
+    }
+
 	public function action()
 	{
 		$user = Typecho_Widget::widget('Widget_User');
@@ -116,6 +129,11 @@ class Handsome_Action extends Typecho_Widget implements Widget_Interface_Do
 		$this->on($this->request->is('do=update'))->updateLink();
 		$this->on($this->request->is('do=delete'))->deleteLink();
 		$this->on($this->request->is('do=sort'))->sortLink();
-		$this->response->redirect($this->options->adminUrl);
+		$this->on($this->request->is('do=uploadfile'))->uploadFile();
+//		$this->response->redirect($this->options->adminUrl);
 	}
 }
+
+
+
+

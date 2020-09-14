@@ -2,29 +2,22 @@
 ?>
 
 <?php
-$content = @$this->stack[0]['categories'][0]['description'];
-$content = json_decode($content,true);
 
-$password = Typecho_Cookie::get('category_'.@$this->stack[0]['categories'][0]['slug']);
+$rData = Utils::isLock($this);
 
-$cookie = false;//true为可以直接进入
-if (!empty($password) && $password == Utils::encodeData(@$content['password'])){
-    $cookie = true;
-}
-
-
-if (is_array($content) && @$content['lock'] == true && !$cookie)
+if ($rData["flag"])
 :?>
     <?php
     $data = array();
     $data['title'] = $this->stack[0]['categories'][0]['name'];
-    $data['md5'] = Utils::encodeData($content['password']);
+    $data['md5'] = Utils::encodeData($rData['password']);
     $data['type'] = "category";
     $data['category'] = $this->stack[0]['categories'][0]['slug'];
-    $data['img'] = @$content['img'];
+    $data['img'] = @$rData['img'];
+
 
     $_GET['data']=$data;
-    require_once('libs/Lock.php'); ?>
+    require('libs/Lock.php'); ?>
 
 <?php else: ?>
 
@@ -86,10 +79,11 @@ if (is_array($content) && @$content['lock'] == true && !$cookie)
         <?php if (!Content::isImageCategory($this->categories)) echo Content::exportHeaderImg($this); ?>
          <!--文章内容-->
          <div id="post-content" class="wrapper-lg">
-          <div class="entry-content l-h-2x">
-          <?php echo Content::postContent($this,$this->user->hasLogin());
-          ?>
-          </div>
+             
+             <?php Content::postContentHtml($this,
+                 $this->user->hasLogin()); ?>
+
+
              <?php if ($this->options->adContentPost != ""): ?>
                  <!--文章页脚的广告位-->
                  <?php $this->options->adContentPost(); ?>
@@ -127,19 +121,6 @@ if (is_array($content) && @$content['lock'] == true && !$cookie)
 
     <?php echo Content::returnReadModeContent($this,$this->user->hasLogin()); ?>
 
-    <script>
-        try {
-            $("[data-morphing]").fancyMorph({
-                hash : 'morphing'
-            });
-        }catch (e){
-
-        }
-
-        <?php if ((@in_array('autoReadMode',$this->options->featuresetup))): ?>
-        $("#morphing").click();
-        <?php endif; ?>
-    </script>
 <!-- footer -->
 	<?php $this->need('component/footer.php'); ?>
   	<!-- / footer -->

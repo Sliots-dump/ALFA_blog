@@ -3,7 +3,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /**
  * Language.php
- * Author     : hewro
+ * Author     : hran
  * Date       : 2017/04/23
  * Version    :
  * Description:

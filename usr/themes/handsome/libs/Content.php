@@ -8,8 +8,12 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  * Version    : 1.0.0
  * Description: 使用PHP方法输出内容
  */
+require("component/List.php");
+
 class Content
 {
+    const version = "42447ab88be199edcae3deeb830b8dd2";
+    const debug = "5e82dd5106a545605319f13e03798261";
 
     /**
      * 输出文章摘要
@@ -31,6 +35,7 @@ class Content
             }
         }
     }
+
 
     public static function returnExceptShortCodeContent($content)
     {
@@ -151,7 +156,7 @@ class Content
             } else {
                 echo '<li class="active">' . _mt("正文") . '&nbsp;&nbsp;</li>';
             }
-            if (!@in_array("no-share",$options->featuresetup)){
+            if (!@in_array("no-share", $options->featuresetup)) {
                 echo '
               <div style="float:right;">
    ' . _mt("分享到") . '：
@@ -178,15 +183,26 @@ class Content
      * @param bool $isCustom 是否是独立页面模板
      * @return string
      */
-    public static function exportPostPageHeader($archive, $isLogin, $isCustom=false)
+    public static function exportPostPageHeader($archive, $isLogin, $isCustom = false)
     {
         $html = "";
         $html .= '
         <header id="small_widgets" class="bg-light lter wrapper-md">
              <h1 class="entry-title m-n font-thin text-black l-h">' . $archive->title;
-        if (!$isCustom){
+        if (!$isCustom) {
             $html .= '<a class="plus-font-size" data-toggle="tooltip" data-original-title="' . _mt("点击改变文章字体大小") . '"><i data-feather="type"></i></a>';
         }
+
+        $options = mget();
+        $expert = json_decode($options->expert, true);
+        if ($expert == null) {
+            $expert = array();
+        }
+        if (@$expert["post_speech"] !== false){
+            $html .= '<a class="speech-button m-l-sm superscript" data-toggle="tooltip" data-original-title="' . _mt("朗读文章") . '"><i data-feather="play-circle"></i></a>';
+        }
+
+
         if ($isLogin) {
             if ($archive->is("page")) {
                 $html .= '
@@ -199,8 +215,8 @@ class Content
                      ';
             }
         }
-        if (!$isCustom){
-            $html .= '<a data-morphing="" id="morphing" data-src="#morphing-content" href="javascript:;" class="read_mode superscript m-l-sm" 
+        if (!$isCustom) {
+            $html .= '<a data-morphing id="morphing" data-src="#morphing-content" href="javascript:;" class="read_mode superscript m-l-sm" 
 data-toggle="tooltip" data-placement="right" data-original-title="' . _mt("阅读模式") . '"><i data-feather="book-open"></i></a>';
         }
 
@@ -257,47 +273,27 @@ data-toggle="tooltip" data-placement="right" data-original-title="' . _mt("阅�
             $html .= '<aside id="aside" class="app-aside hidden-xs bg-' . $customArray[2] . '">';
         } else {
             switch ($options->themetype) {
+                case 2:
+                case 4:
+                case 11:
                 case 0:
                     $html .= '<aside id="aside" class="app-aside hidden-xs bg-black">';
                     break;
-                case 1:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-dark">';
-                    break;
-                case 2:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-black">';
-                    break;
                 case 3:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-dark">';
-                    break;
-                case 4:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-black">';
-                    break;
                 case 5:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-dark">';
-                    break;
                 case 6:
+                case 10:
+                case 12:
+                case 13:
+                case 1:
                     $html .= '<aside id="aside" class="app-aside hidden-xs bg-dark">';
                     break;
                 case 7:
                     $html .= '<aside id="aside" class="app-aside hidden-xs bg-white">';
                     break;
+                case 9:
                 case 8:
                     $html .= '<aside id="aside" class="app-aside hidden-xs bg-light">';
-                    break;
-                case 9:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-light">';
-                    break;
-                case 10:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-dark">';
-                    break;
-                case 11:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-black">';
-                    break;
-                case 12:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-dark">';
-                    break;
-                case 13:
-                    $html .= '<aside id="aside" class="app-aside hidden-xs bg-dark">';
                     break;
 
             }
@@ -512,7 +508,7 @@ EOF;
         }
         if (@in_array('container-box', $options)) {
             $layout .= 'container ';
-        }else{
+        } else {
             $layout .= 'no-container ';
         }
         if (@in_array('header-fix', $options)) {
@@ -530,7 +526,11 @@ EOF;
      */
     public static function exportHtmlTag($options)
     {
-        $html = '<html class="no-js';
+        $theme = "";
+        if (@$_COOKIE['theme_dark'] == "1") {
+            $theme = " theme-dark ";
+        }
+        $html = '<html class="small-scroll-bar no-js' . $theme;
         if (@in_array('container-box', $options) || @in_array('opacityMode', $options)) {
             $html .= ' bg';
         }
@@ -572,7 +572,7 @@ EOF;
 
         $css .= $options->customCss;
 
-        if (COMMENT_SYSTEM != 0){
+        if (COMMENT_SYSTEM != 0) {
             $css .= <<<EOF
     .nav-tabs-alt .nav-tabs>li[data-index="2"].active~.navs-slider-bar {
         transform: translateX(405%);
@@ -612,9 +612,9 @@ EOF;
         } else {
             $payTips = $options->payTips;
         }
-        $returnHtml =  '
+        $returnHtml = '
              <div class="support-author">
-                 <button data-toggle="modal" data-target="#myModal" class="btn btn-pay btn-danger btn-rounded"><i class="fontello fontello-wallet" aria-hidden="true"></i>&nbsp;' . _mt("赞赏") . '</button>
+                 <button id="support_author" data-toggle="modal" data-target="#myModal" class="btn btn-pay btn-danger btn-rounded"><i class="fontello fontello-wallet" aria-hidden="true"></i>&nbsp;' . _mt("赞赏") . '</button>
                  <div class="mt20 text-center article__reward-info">
                      <span class="mr10">' . $payTips . '</span>
                  </div>
@@ -629,22 +629,22 @@ EOF;
                          <div class="modal-body">
                              <p class="text-center article__reward"> <strong class="article__reward-text">' . _mt("扫一扫支付") . '</strong> </p>
                              <div class="tab-content">';
-        if ($options->AlipayPic!=null){
-            $returnHtml .= '<img noGallery aria-labelledby="alipay-tab" class="pay-img tab-pane fade in active" id="alipay_author" role="tabpanel" src="' . $options->AlipayPic . '" />';
+        if ($options->AlipayPic != null) {
+            $returnHtml .= '<img noGallery aria-labelledby="alipay-tab" class="pay-img tab-pane fade in active" id="alipay_author" role="tabpanel" src="' . Utils::choosePlaceholder(mget()) . '" data-original="' . $options->AlipayPic . '" />';
         }
-        if ($options->WechatPic!=null){
-            $returnHtml .= '<img noGallery aria-labelledby="wechatpay-tab" class="pay-img tab-pane fade" id="wechatpay_author" role="tabpanel" src="' . $options->WechatPic . '" />';
+        if ($options->WechatPic != null) {
+            $returnHtml .= '<img noGallery aria-labelledby="wechatpay-tab" class="pay-img tab-pane fade" id="wechatpay_author" role="tabpanel" src="' . Utils::choosePlaceholder(mget()) . '" data-original="' . $options->WechatPic . '" />';
         }
 
-        $returnHtml .='</div>
+        $returnHtml .= '</div>
                              <div class="article__reward-border mb20 mt10"></div>
 
                              <div class="text-center" role="tablist">';
-        if ($options->AlipayPic!=null){
+        if ($options->AlipayPic != null) {
             $returnHtml .= '<div class="pay-button" role="presentation" class="active"><button  href="#alipay_author" id="alipay-tab" aria-controls="alipay_author" role="tab" data-toggle="tab" class="btn m-b-xs m-r-xs btn-info"><i class="iconfont icon-alipay" aria-hidden="true"></i><span>&nbsp;' . _mt("支付宝支付") . '</span></button>
                                  </div>';
         }
-        if ($options->WechatPic!=null){
+        if ($options->WechatPic != null) {
             $returnHtml .= '<div class="pay-button" role="presentation"><button href="#wechatpay_author" id="wechatpay-tab" aria-controls="wechatpay_author" role="tab" data-toggle="tab" class="btn m-b-xs btn-success"><i class="iconfont icon-wechatpay" aria-hidden="true"></i><span>&nbsp;' . _mt("微信支付") . '</span></button>
                                  </div>';
         }
@@ -682,23 +682,36 @@ EOF;
         } else if ($archive->fields->reprint == "forbidden") {
             $content = _mt("禁止转载");
             $interpretation = _mt("除非获得原作者的单独授权，任何第三方不得转载");
+        } else if ($archive->fields->reprint == "trans") {
+            $content = _mt("转载自他站");
+            $interpretation = _mt("本文转载自他站，转载请保留原站地址");
+        } else if ($archive->fields->reprint == "internet") {
+            $content = _mt("来自互联网");
+            $interpretation = _mt("本来来自互联网，未知来源，侵权请联系删除");
         }
-
-        return '
-             <div class="show-foot">
-                 <div class="notebook">
+        $options = mget();
+        $expert = json_decode($options->expert, true);
+        $html = "";
+        $html .= '<div class="show-foot">';
+        if (@$expert["show_post_last_date"] !== false) {
+            $html .= '<div class="notebook">
                      <i class="fontello fontello-clock-o"></i>
                      <span>' . _mt("最后修改") . '：' . date(_mt("Y 年 m 月 d 日 h : i  A"), $time + $obj) . '</span>
-                 </div>
-                 <div class="copyright" data-toggle="tooltip" data-html="true" data-original-title="' . $interpretation . '"><span>© ' . $content . '</span>
+                 </div>';
+        }
+
+        $html .= '<div class="copyright" data-toggle="tooltip" data-html="true" data-original-title="' . $interpretation . '"><span>© ' . $content . '</span>
                  </div>
              </div>
         ';
+
+        return $html;
 
     }
 
     /**
      * 处理具体的头图显示逻辑：当有头图时候，显示随机图片还是第一个附件还是一张图片还是thumb字段
+     * @param $widget $this变量
      * @param int $index
      * @param $howToThumb 显示缩略图的方式，0，1，2，3
      * @param $attach 文章的第一个附件
@@ -706,16 +719,16 @@ EOF;
      * @param $thumbField thumb字段
      * @return string
      */
-    public static function whenSwitchHeaderImgSrc($index = 0, $howToThumb, $attach, $content, $thumbField)
+    public static function whenSwitchHeaderImgSrc($widget, $index = 0, $howToThumb, $attach, $content, $thumbField)
     {
-        $options = mget();
+
         $randomNum = unserialize(INDEX_IMAGE_ARRAY);
 
         // 随机缩略图路径
-        $random = THEME_URL . 'usr/img/sj/' . @$randomNum[$index] . '.jpg';//如果有文章置顶，这里可能会导致index not undefined
+        $random = STATIC_PATH . 'img/sj/' . @$randomNum[$index] . '.jpg';//如果有文章置顶，这里可能会导致index not undefined
         $pattern = '/\<img.*?src\=\"(.*?)\"[^>]*>/i';
-        $patternMD = '/\!\[.*?\]\((http(s)?:\/\/.*?(jpg|png))/i';
-        $patternMDfoot = '/\[.*?\]:\s*(http(s)?:\/\/.*?(jpg|png))/i';
+        $patternMD = '/\!\[.*?\]\((http(s)?:\/\/.*?(jpg|png|JPEG|webp|jpeg|bmp|gif))/i';
+        $patternMDfoot = '/\[.*?\]:\s*(http(s)?:\/\/.*?(jpg|png|JPEG|webp|jpeg|bmp|gif))/i';
 
         if ($howToThumb == '0') {
             return $random;
@@ -798,23 +811,27 @@ EOF;
         }
         switch ($thumbSelect) {
             case -1:
-                $imgSrc = Content::whenSwitchHeaderImgSrc($index, $options->RandomPicChoice, $widget->attachments(1)->attachment, $widget->content, $widget->fields->thumb);
+                $imgSrc = Content::whenSwitchHeaderImgSrc($widget, $index, $options->RandomPicChoice,
+                    $widget->attachments(1)->attachment, $widget->content, $widget->fields->thumb);
                 break;
             case 0://全部关闭
                 break;
             case 1://全部开启
-                $imgSrc = Content::whenSwitchHeaderImgSrc($index, $options->RandomPicChoice, $widget->attachments(1)->attachment, $widget->content, $widget->fields->thumb);
+                $imgSrc = Content::whenSwitchHeaderImgSrc($widget, $index, $options->RandomPicChoice,
+                    $widget->attachments(1)->attachment, $widget->content, $widget->fields->thumb);
                 break;
             case 2://不显示文章头图，显示首页头图
                 if ($select == "post") {
                     $imgSrc = "";
                 } else {
-                    $imgSrc = Content::whenSwitchHeaderImgSrc($index, $options->RandomPicChoice, $widget->attachments(1)->attachment, $widget->content, $widget->fields->thumb);
+                    $imgSrc = Content::whenSwitchHeaderImgSrc($widget, $index, $options->RandomPicChoice,
+                        $widget->attachments(1)->attachment, $widget->content, $widget->fields->thumb);
                 }
                 break;
             case 3://不显示首页头图，显示文章页面头图
                 if ($select == "post") {
-                    $imgSrc = Content::whenSwitchHeaderImgSrc($index, $options->RandomPicChoice, $widget->attachments(1)->attachment, $widget->content, $widget->fields->thumb);
+                    $imgSrc = Content::whenSwitchHeaderImgSrc($widget, $index, $options->RandomPicChoice,
+                        $widget->attachments(1)->attachment, $widget->content, $widget->fields->thumb);
                 } else {
                     $imgSrc = "";
                 }
@@ -845,7 +862,7 @@ EOF;
         $year = date('Y/m', $obj->date->timeStamp);
         $day = date('d', $obj->date->timeStamp);
         $notice = _mt("扫描右侧二维码阅读全文");
-        $image = THEME_URL . 'libs/GetCode.php?type=url&content=' . $url;
+        $image = THEME_URL . 'libs/interface/GetCode.php?type=url&content=' . $url;
         $options = mget();
         //如果开启了开关才需要生成，否则返回空
         if (@in_array("sreenshot", $options->featuresetup) && $obj->is("post")) {
@@ -871,18 +888,41 @@ EOF;
     }
 
 
+    public static function getPostParseWay()
+    {
+        $way = "origin";
+        if (!Device::isIE()) {
+            if (Utils::isPluginAvailable("Handsome_Plugin", "Handsome")) {
+                $way = Helper::options()->plugin('Handsome')->parseWay;
+            }
+        }
+        return $way;
+
+    }
+
     public static function returnReadModeContent($obj, $status)
     {
         $html = "";
         $author = $obj->author->screenName;
         $time = date("Y 年 m 月 d 日", $obj->date->timeStamp);
-        $content = Content::postContent($obj, $status);
+
+        $way = self::getPostParseWay();
+
+        $content = Content::postContent($obj, $status, $way);
+        if ($way == "vditor") {
+            $core_content = '<div class="loading-post text-center m-t-lg m-b-lg">
+                 <p class="infinite-scroll-request"><i class="animate-spin fontello fontello-refresh"></i>Loading...</p>
+             </div><div id="morphing-content-real"></div>
+            <textarea class="hide" id="morphing-content-real_text">' . htmlspecialchars($content) . '</textarea>';
+        } else {
+            $core_content = '<div id="morphing-content-real_origin">' . $content . '</div>';
+        }
         $html .= <<<EOF
 <div id="morphing-content" class="hidden read_mode_article">
         <div class="page">
             <h1 class="title">$obj->title</h1>
-            <div class="metadata singleline"><a href="#" rel="author" class="byline">{$author}</a>&nbsp;•&nbsp;<span class="delimiter"></span><time class="date">{$time}</time></div>
-            {$content}
+            <div class="metadata singleline"><a href="#" rel="author" class="byline">{$author}</a>&nbsp;•&nbsp;<span class="delimiter"></span><time class="date">{$time}</time></div>     
+            {$core_content}
         </div>
     </div>
 EOF;
@@ -939,18 +979,26 @@ EOF;
     public static function echoPostList($obj)
     {
 
+        //todo 优化性能
+
+
         $options = mget();
 
         $index = 0;
 
-        echo '<div class="blog-post">';
+        if ($options->thumbArrangeStyle == "water_fall") {
+//            echo '<div class="blog-post water-fall">';
+            echo '<div class="blog-post water-fall-container">';
+        } else {
+            echo '<div class="blog-post">';
+        }
         while ($obj->next()) {
             $parameterArray = array();
             $parameterArray['title'] = $obj->sticky . $obj->title;
 
             //是否是大版式头图
             $styleThumb = strtoupper($obj->fields->thumbStyle);
-            if ($styleThumb == "DEFAULT" || trim($styleThumb) == ""){//跟随外观设置的配置
+            if ($styleThumb == "DEFAULT" || trim($styleThumb) == "") {//跟随外观设置的配置
                 if ($options->thumbStyle == "0") {//小头图
                     $parameterArray['thumbStyle'] = "SMALL";
                 } else if ($options->thumbStyle == "2") {//交错显示
@@ -961,18 +1009,20 @@ EOF;
                     }
                 } else if ($options->thumbStyle == "1") {//大头图
                     $parameterArray['thumbStyle'] = "LARGE";
+                } else if ($options->thumbStyle == "3") {
+                    $parameterArray['thumbStyle'] = "PICTURE";
                 } else {//默认是大图
                     $parameterArray['thumbStyle'] = "LARGE";
 
                 }
-            }else{
+            } else {
                 $parameterArray['thumbStyle'] = $styleThumb;
             }
 
             if (in_array('NoSummary-index', $options->indexsetup)) {
                 $expertNum = 0;
             } else {
-                if ( $parameterArray['thumbStyle'] == "SMALL") {//小头图
+                if ($parameterArray['thumbStyle'] == "SMALL") {//小头图
                     if ($options->numberOfSmallPic == "") {//自定义摘要字数
                         $expertNum = 80;
                     } else {
@@ -989,15 +1039,14 @@ EOF;
             if (trim($obj->fields->customSummary) != "") {
                 $obj->excerpt = $obj->fields->customSummary;
             }
-            $content = $obj->stack[$index]['categories'][0]['description'];
-            $content = json_decode($content, true);
-
-            if (is_array($content) && @$content['lock'] == true) {//加密分类
+            $data = Utils::isLock($obj, $index);
+            if ($data["flag"]) {//加密分类
                 $parameterArray['summary'] = Content::excerpt("", $expertNum);
             } else {
                 $parameterArray['summary'] = Content::excerpt($obj->excerpt, $expertNum);
             }
             $parameterArray['imgSrc'] = Content::returnHeaderImgSrc($obj, "index", $index);
+
 
             $parameterArray['linkUrl'] = $obj->permalink;
             /*if (index == 0){
@@ -1073,10 +1122,10 @@ EOF;
         //首页文章
         if ($parameterArray['isIndex']) {//首页界面的文章item结构
             //头图部分
-            if ($parameterArray['imgSrc'] == "") {//图片地址为空即不显示头图
+            if ($parameterArray['imgSrc'] == "" && $parameterArray['thumbStyle'] !== "PICTURE") {//图片地址为空即不显示头图
                 $html .= '<div class="single-post panel">';
             } else {
-                if ( $parameterArray['thumbStyle'] == "LARGE") {//大版式头图
+                if ($parameterArray['thumbStyle'] == "LARGE") {//大版式头图
                     $backgroundImageHtml = Utils::returnDivLazyLoadHtml($parameterArray['imgSrc'], 1200, 0);
                     if ($parameterArray['isFixedImg']) {//裁剪头图
                         $html .= <<<EOF
@@ -1092,11 +1141,12 @@ EOF;
                     } else {//头图没有裁剪
                         $imageHtml = Utils::returnImageLazyLoadHtml(false, $parameterArray['imgSrc'], 1200, 0);
                         $html .= <<<EOF
-<div class="single-post panel"><div class="index-post-img"><a href="{$parameterArray['linkUrl']}"><img {$imageHtml} 
+<div class="single-post panel">
+<div class="index-post-img"><a href="{$parameterArray['linkUrl']}"><img {$imageHtml} 
 class="img-full lazy" /></a></div>
 EOF;
                     }
-                } else if ( $parameterArray['thumbStyle'] == "SMALL"){//小版式头图
+                } else if ($parameterArray['thumbStyle'] == "SMALL") {//小版式头图
                     if (trim($parameterArray['smallThumbField']) !== "") {//小头图专用字段
                         $parameterArray['imgSrc'] = $parameterArray['smallThumbField'];
                     }
@@ -1109,11 +1159,11 @@ EOF;
         </a>
     </div>
 EOF;
-                }else {//图片版式
+                } else {//图片版式
                     //TODO: picture
                     $backgroundImageHtml = Utils::returnDivLazyLoadHtml($parameterArray['imgSrc'], 1200, 0);
                     $html .= <<<EOF
-<div class="panel-picture border-radius-6 box-shadow-wrap-normal">
+<div class="single-post panel-picture border-radius-6 box-shadow-wrap-normal">
                 <figure class="post-thumbnail border-radius-6">
                     <a class="post-thumbnail-inner index-image lazy" href="{$parameterArray['linkUrl']}" 
                     $backgroundImageHtml>  </a>
@@ -1124,13 +1174,12 @@ EOF;
                         <span class="byline"><span class="author vcard"><a  href="{$parameterArray['linkUrl']}" tabindex="0">{$parameterArray['summary']}</a></span></span>
                     </div>
                 </header>
-            </div>
+</div>
 EOF;
-
                 }
             }
             //图片样式不用添加这部分
-            if ($parameterArray['thumbStyle'] !== "PICTURE" ){
+            if ($parameterArray['thumbStyle'] !== "PICTURE") {
                 //标题部分
                 $html .= <<<EOF
 <div class="post-meta wrapper-lg">
@@ -1180,23 +1229,24 @@ EOF;
 </div><!--panel/panel-small-->
 
 EOF;
+            } else {//picture头图样式
+
 
             }
-
         } else {//文章页面的item结构，只有头图，没有其他的了
             if ($parameterArray['imgSrc'] !== "") {
                 $copyright = "";
-                if (trim($parameterArray['thumbDesc'])!=""){
-                    $copyright ='<div class="img_copyright" data-toggle="tooltip" data-placement="left" data-original-title="'.$parameterArray['thumbDesc'].'"><i class="glyphicon glyphicon-copyright-mark"></i></div>';
+                if (trim($parameterArray['thumbDesc']) != "") {
+                    $copyright = '<div class="img_copyright" data-toggle="tooltip" data-placement="left" data-original-title="' . $parameterArray['thumbDesc'] . '"><i class="glyphicon glyphicon-copyright-mark"></i></div>';
                 }
                 //显示头图版权信息
 
                 if ($parameterArray['isFixedImg']) {//固定头图大小
-                    $html .= '<div class="entry-thumbnail" aria-hidden="true"><div class="item-thumb lazy" ' . Utils::returnDivLazyLoadHtml($parameterArray['imgSrc'], 1200, 0) . '>'.$copyright.'</div></div>';
+                    $html .= '<div class="entry-thumbnail" aria-hidden="true"><div class="item-thumb lazy" ' . Utils::returnDivLazyLoadHtml($parameterArray['imgSrc'], 1200, 0) . '>' . $copyright . '</div></div>';
                 } else {
                     $html .= '<div class="entry-thumbnail" aria-hidden="true"><img width="100%" height="auto" '
                         . Utils::returnImageLazyLoadHtml(false, $parameterArray['imgSrc'], 1200, 0) . ' 
- class="img-responsive lazy" />'.$copyright.'</div>';
+ class="img-responsive lazy" />' . $copyright . '</div>';
                 }
             }
         }
@@ -1274,7 +1324,7 @@ EOF;
         $attr = htmlspecialchars_decode($matches[3]);//还原转义前的参数列表
         $attrs = self::shortcode_parse_atts($attr);//获取短代码的参数
         $type = "info";
-        switch ($attrs['type']) {
+        switch (@$attrs['type']) {
             case 'yellow':
                 $type = "warning";
                 break;
@@ -1291,7 +1341,7 @@ EOF;
                 $type = "share";
                 break;
         }
-        return '<div class="tip inlineBlock ' . $type . '">' . $matches[5] . '</div>';
+        return '<div class="tip inlineBlock ' . $type . '">'."\n\n" . $matches[5] . "\n".'</div>';
     }
 
     /**
@@ -1312,7 +1362,8 @@ EOF;
 
         $content = $matches[5];
 
-        return Content::parseContentToImage($content,@$attrs["type"] );
+
+        return Content::parseContentToImage($content, @$attrs["type"]);
 
 
     }
@@ -1424,16 +1475,187 @@ aria-controls='" . $id . "' role=\"tab\" href='#$id'>$name</a></li>";
 
         return <<<EOF
 <div class="tab-container post_tab box-shadow-wrap-lg">
-    <ul class="nav no-padder b-b" role="tablist">
-       $tabs
-    </ul>
-    <div class="tab-content no-border">
-        $tabContents
-    </div>
+<ul class="nav no-padder b-b" role="tablist">
+{$tabs}
+</ul>
+<div class="tab-content no-border">
+{$tabContents}
+</div>
 </div>
 EOF;
     }
 
+    public static function QRParseCallback($matches)
+    {
+        $options = mget();
+        // 不解析类似 [[player]] 双重括号的代码
+        if ($matches[1] == '[' && $matches[6] == ']') {
+            return substr($matches[0], 1, -1);
+        }
+        $attr = htmlspecialchars_decode($matches[3]);//还原转义前的参数列表
+        $attrs = self::shortcode_parse_atts($attr);//获取短代码的参数
+        $title = @$attrs["title"];
+        $sub = $attrs["sub"];
+        $desc = $attrs["desc"];
+        $url = @$attrs["url"];
+        $img = THEME_URL . "libs/interface/GetCode.php?type=url&content=" . $url;
+
+        return <<<EOF
+<div class="m-b-md text-center countdown border-radius-6 box-shadow-wrap-normal">
+<div class="r item hbox no-border">
+<div class="col bg-light  w-210 v-middle wrapper-md">
+<div class="entry-title font-thin h4 text-black l-h margin-b" ><span>{$title}</span></div>
+<div class="font-thin h5"><span>{$sub}</span></div>
+</div>
+<div class="col bg-white padder-v r-r vertical-flex">
+<div class="row text-center no-gutter w-full padder-sm ">
+<div class="font-thin">
+<img class="img-QR" src="{$img}" />
+<span class="font-bold">{$desc}</span>
+</div>
+</div>             
+</div>
+</div>
+</div>
+EOF;
+
+
+    }
+
+    /**
+     * @param $matches
+     * @return bool|string
+     */
+    public static function countdownParseCallback($matches)
+    {
+        $options = mget();
+        // 不解析类似 [[player]] 双重括号的代码
+        if ($matches[1] == '[' && $matches[6] == ']') {
+            return substr($matches[0], 1, -1);
+        }
+
+        $attr = htmlspecialchars_decode($matches[3]);//还原转义前的参数列表
+        $attrs = self::shortcode_parse_atts($attr);//获取短代码的参数
+        $id = "countdown-" . md5(uniqid()) . rand(0, 100);
+        $end = $attrs["time"];
+        $title = @$attrs['title'];
+        $head = "";
+        if (trim($title) !== "") {
+            $head = <<<EOF
+            <div class="entry-title font-thin h4 text-black l-h margin-b" ><span>{$title}</span></div>
+EOF;
+        }
+        $link = @$attrs["url"];
+        $button = "";
+
+        if (trim($link) !== "") {
+            $button .= <<<EOF
+<a class="btn m-b-xs btn-danger btn-addon margin-t" href="$link" target="_blank">
+查看详情</a>
+EOF;
+        }
+        $desc = @$attrs["desc"];
+        if (trim($desc) == "") {
+            $desc = _mt("倒计时");
+        }
+        $html = "";
+        $js = "";
+        //当前距离截止时间的秒数
+        $leaveTime = strtotime($end);
+        if ($leaveTime < 0) {
+
+            $html .= <<<EOF
+<div class="m-b-md text-center countdown border-radius-6 box-shadow-wrap-normal" id="{$id}">
+              <div class="r item hbox no-border">
+                <div class="col bg-light  w-210 v-middle wrapper-md">
+                    $head
+                  <div class="font-thin h5"><span>{$desc}</span></div>
+                  $button
+                </div>
+                <div class="col bg-white padder-v r-r vertical-flex">
+                <div class="row text-center no-gutter w-full">
+                     <div class="font-thin text-muted"><span>已结束，截止日期：{$end}</span></div>
+
+                </div>             
+                 </div>
+            </div>
+</div>
+EOF;
+        } else {
+            $html .= <<<EOF
+<div class="m-b-md text-center countdown border-radius-6 box-shadow-wrap-normal" id="{$id}">
+              <div class="r item hbox no-border">
+                <div class="col bg-light  w-210 v-middle wrapper-md">
+                  $head
+                  <div class="font-thin h5"><span>{$desc}</span></div>
+                  $button
+                </div>
+                <div class="col bg-white padder-v r-r vertical-flex">
+                <div class="row text-center no-gutter w-full">
+                <div class="col-xs-3">
+                    <div class="inline m-t-sm">
+                  <div  class="easyPieChart pie-days">
+                    <div class="text-muted">
+                      <span class="span-days">0</span>天
+                    </div>
+                </div>
+              </div>
+              </div>
+              
+              <div class="col-xs-3">
+                <div class="inline m-t-sm">
+                  <div class="easyPieChart pie-hours">
+                    <div class="text-muted ">
+                      <span class="span-hours">0</span>小时
+                    </div>
+                </div>
+              </div>
+              </div>
+              
+              <div class="col-xs-3">
+                <div class="inline m-t-sm">
+                  <div class="easyPieChart pie-minutes">
+                    <div class="text-muted">
+                      <span class="span-minutes">0</span>分钟
+                    </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-xs-3">
+                <div class="inline m-t-sm">
+                  <div class="easyPieChart pie-seconds">
+                    <div class="text-muted">
+                      <span class="span-seconds">0</span>秒
+                    </div>
+                </div>
+              </div>
+            </div>
+            
+                </div>             
+                 </div>
+            </div>
+</div>
+EOF;
+
+            $js .= <<<EOF
+<script>
+$(function() {
+     $.Module_Timer({
+     
+        startTime: $leaveTime,
+        id: '$id'
+    });
+});         
+</script>
+EOF;
+
+            $html .= $js;
+        }
+        return $html;
+
+
+    }
 
     /**
      * 折叠框解析
@@ -1465,17 +1687,13 @@ EOF;
         $id = "collapse-" . md5(uniqid()) . rand(0, 100);
 
         return <<<EOF
-<div class="panel panel-default collapse-panel box-shadow-wrap-lg">
-        <div class="panel-heading panel-collapse" data-toggle="collapse" data-target="#{$id}" 
-          aria-expanded="true">
-    <div class="accordion-toggle"><span>{$title}</span>
-      <i class="pull-right fontello icon-fw fontello-angle-right"></i>
-      </div>
-        </div>
-        <div id="{$id}" class="panel-body {$class}">
-          {$content}
-        </div>
- </div>
+<div class="panel panel-default collapse-panel box-shadow-wrap-lg"><div class="panel-heading panel-collapse" data-toggle="collapse" data-target="#{$id}" aria-expanded="true"><div class="accordion-toggle"><span>{$title}</span>
+<i class="pull-right fontello icon-fw fontello-angle-right"></i>
+</div>
+</div>
+<div id="{$id}" class="panel-body {$class}">
+{$content}
+</div></div>
 EOF;
 
 
@@ -1515,7 +1733,8 @@ EOF;
         }
 
         if (@$attrs['id'] !== null) {//云解析
-            $getUrl = THEME_URL . 'libs/Get.php?id=' . @$attrs["id"] . '&type=' . @$attrs["type"] . '&media=' . @$attrs["media"];
+            $getUrl = THEME_URL . 'libs/interface/Get.php?id=' . @$attrs["id"] . '&type=' . @$attrs["type"] . '&media=' .
+                @$attrs["media"];
         } else {
             $getUrl = "";
         }
@@ -1538,6 +1757,24 @@ class="db audio_info_area"><strong class="db audio_title">加载中……</stron
         return $playCode;
 
         //为自定义Mp3播放地址解析[player][/player]内部的[mp3]标签,这个地方以后可能才会用到，添加多首歌曲播放
+    }
+
+
+    public static function returnLinkList($sort, $id)
+    {
+
+
+        $mypattern = <<<eof
+<div class="col-sm-6">
+<a href="{url}" target="_blank" class="list-group-item no-borders box-shadow-wrap-lg"> <span 
+class="pull-left thumb-sm avatar m-r"> <img 
+  src={image} alt="Error" class="img-square" /> <i class="{color} right"></i> </span> <span class="clear"><span class="text-ellipsis">
+  {name}</span> <small 
+  class="text-muted clear text-ellipsis">{title}</small> </span> </a>
+</div>
+eof;
+
+        return '<div class="tab-pane fade in" id="' . $id . '"><div class="list-group list-group-lg list-group-sp row" style="margin: 0">' . Handsome_Plugin::output_str($mypattern, 0, $sort) . '</div></div>';
     }
 
 
@@ -1567,21 +1804,26 @@ class="db audio_info_area"><strong class="db audio_title">加载中……</stron
         } else {
             $pic = STATIC_PATH . 'img/video.jpg';
         }
-        $playCode = '<video src="' . $url . '"style="background-image:url(' . $pic . ');background-size: cover;"></video>';
+        $playCode = '<video src="' . $url . '" style="background-image:url(' .
+            $pic . ');background-size: cover;"></video>';
+
+        //把背景图片作为第一帧
+//        $playCode = '<video src="' . $url . '" poster="'.$pic.'"></video>';
 
         return $playCode;
 
     }
 
-    public static function emojiParseCallback($matches){
-        $emotionPathPrefix = THEME_FILE . 'usr/img/emotion';
-        $emotionUrlPrefix = THEME_URL . 'usr/img/emotion';
-        $path = $emotionPathPrefix . '/'.@$matches[1].'/'.@$matches[2].'.png';
-        $url = $emotionUrlPrefix . '/'.@$matches[1].'/'.@$matches[2].'.png';
+    public static function emojiParseCallback($matches)
+    {
+        $emotionPathPrefix = THEME_FILE . 'assets/img/emotion';
+        $emotionUrlPrefix = STATIC_PATH . 'img/emotion';
+        $path = $emotionPathPrefix . '/' . @$matches[1] . '/' . @$matches[2] . '.png';
+        $url = $emotionUrlPrefix . '/' . @$matches[1] . '/' . @$matches[2] . '.png';
         //检查图片文件是否存在
-        if(is_file($path) == true){
-            return '<img src="'.$url.'" class="emotion-'.@$matches[1].'">';
-        }else{
+        if (is_file($path) == true) {
+            return '<img src="' . $url . '" class="emotion-' . @$matches[1] . '">';
+        } else {
             return @$matches[0];
         }
     }
@@ -1625,12 +1867,15 @@ class="db audio_info_area"><strong class="db audio_title">加载中……</stron
                 $targetTitle = "文章不存在，或文章是加密、私密文章";
             } else {
                 $result = Typecho_Widget::widget('Widget_Abstract_Contents')->push($posts[0]);
-                if ($cover == "") {
+                if ($cover == "" || $cover == "http://") {
+
                     $thumbArray = $db->fetchAll($db
                         ->select()->from($prefix . 'fields')
                         ->orWhere('cid = ?', $cid)
                         ->where('name = ? ', 'thumb'));
-                    $targetImgSrc = Content:: whenSwitchHeaderImgSrc(0, 2, null, $result['text'], @$thumbArray[0]['str_value']);
+                    $targetImgSrc = Content:: whenSwitchHeaderImgSrc(null, 0, 2, null, $result['text'],
+                        @$thumbArray[0]['str_value']);
+
                 } else {
                     $targetImgSrc = $cover;
                 }
@@ -1658,20 +1903,20 @@ class="db audio_info_area"><strong class="db audio_title">加载中……</stron
 
         return <<<EOF
 <div class="preview">
-   <div class="post-inser post box-shadow-wrap-normal">
-    <a href="{$targetUrl}" target="_blank" class="post_inser_a ">
-    {$imageHtml}
-    <div class="inner-content" $noImageCss>
-     <p class="inser-title">{$targetTitle}</p>
-     <div class="inster-summary text-muted">
-      {$targetSummary}
-     </div>
-    </div>
-    </a>
-    <!-- .inner-content #####-->
-   </div>
-   <!-- .post-inser ####-->
-  </div>
+<div class="post-inser post box-shadow-wrap-normal">
+<a href="{$targetUrl}" target="_blank" class="post_inser_a no-external-link">
+{$imageHtml}
+<div class="inner-content" $noImageCss>
+<p class="inser-title">{$targetTitle}</p>
+<div class="inster-summary text-muted">
+{$targetSummary}
+</div>
+</div>
+</a>
+<!-- .inner-content #####-->
+</div>
+<!-- .post-inser ####-->
+</div>
 EOF;
 
     }
@@ -1705,8 +1950,14 @@ EOF;
         if (@$attrs['color'] != "") {
             $color = $attrs['color'];
         }
-        if (@$attrs['icon'] != "") {
-            $icon = '<i class="' . $attrs['icon'] . '"></i>';
+
+        if (@$attrs['icon'] != "") {//判断是否是feather 图标
+            if (count(mb_split(" ", $attrs['icon'])) > 1 || strpos($attrs['icon'],"fontello") !== false || strpos
+                ($attrs['icon'],"glyphicon") !== false) {
+                $icon = '<i class="' . $attrs['icon'] . '"></i>';
+            } else {
+                $icon = '<i><i data-feather="' . $attrs['icon'] . '"></i></i>';
+            }
             $addOn = 'btn-addon';
         }
 
@@ -1719,9 +1970,10 @@ EOF;
     /**
      * 解析时光机页面的评论内容
      * @param $content
+     * @param $children
      * @return string
      */
-    public static function timeMachineCommentContent($content)
+    public static function timeMachineCommentContent($content, $children)
     {
         return Content::parseContentPublic($content);
     }
@@ -1786,7 +2038,7 @@ EOF;
         }
 
         //解析文章中的表情短代码
-        $content = Utils::handle_preg_replace_callback('/::([^:\s]*?):([^:\s]*?)::/sm', array('Content','emojiParseCallback'),
+        $content = Utils::handle_preg_replace_callback('/::([^:\s]*?):([^:\s]*?)::/sm', array('Content', 'emojiParseCallback'),
             $content);
 
         //调用其他文章页面的摘要
@@ -1828,11 +2080,13 @@ EOF;
         }
 
         //文章中的链接，以新窗口方式打开
-        $content = preg_replace_callback("/<a href=\"([^\"]*)\">(.*?)<\/a>/", function ($matches){
-            if (strpos($matches[1],BLOG_URL) !== false || strpos(substr($matches[1],0,6),"http") === false){
-                return '<a href="'.$matches[1].'">'.$matches[2].'</a>';
-            }else{
-                return '<span class="external-link"><a href="'.$matches[1].'" target="_blank">'.$matches[2]."<i data-feather='external-link'></i></a></span>";
+        $content = preg_replace_callback("/<a href=\"([^\"]*)\">(.*?)<\/a>/", function ($matches) {
+            if (strpos($matches[1], substr(BLOG_URL, 0, -1)) !== false || strpos(substr($matches[1], 0, 6), "http") === false) {
+                return '<a href="' . $matches[1] . '">' . $matches[2] . '</a>';
+            } else {
+                return '<span class="external-link"><a class="no-external-link" href="' . $matches[1] . '" target="_blank">' .
+                    $matches[2] .
+                    "<i data-feather='external-link'></i></a></span>";
             }
         }, $content);
 
@@ -1877,16 +2131,48 @@ EOF;
     }
 
 
+    public static function postContentHtml($obj, $status)
+    {
+
+        $way = self::getPostParseWay();
+
+
+        $content = Content::postContent($obj, $status, $way);
+
+
+        if ($way == "vditor") {
+            echo
+            '<div class="loading-post text-center m-t-lg m-b-lg">
+                 <p class="infinite-scroll-request"><i class="animate-spin fontello fontello-refresh"></i>Loading...</p>
+             </div>';
+
+            echo '<div class="entry-content hide l-h-2x" id="md_handsome"></div>';
+
+            echo '<textarea id="handsome_md_text" class="hide" >' . htmlspecialchars($content) . '</textarea>';
+        } else {
+            echo '<div class="entry-content l-h-2x" id="md_handsome_origin">' . $content . '</div>';
+        }
+    }
+
     /**
      * 输入内容之前做一些有趣的替换+输出文章内容
      *
      * @param $obj
      * @param $status
+     * @param string $way
      * @return string
      */
-    public static function postContent($obj, $status)
+    public static function postContent($obj, $status, $way = "origin")
     {
-        $content = $obj->content;
+        if ($way == "origin") {
+            $content = $obj->content;
+        } else {
+            $content = $obj->content;
+//            $content = Handsome_Parsedown::instance()
+//                ->setBreaksEnabled(false)
+//                ->text($obj->content);
+        }
+
         $options = mget();
         $isImagePost = self::isImageCategory($obj->categories);
         if (!$isImagePost && trim($obj->fields->outdatedNotice) == "yes" && $obj->is('post')) {
@@ -1898,7 +2184,7 @@ EOF;
 ' . $content;
             }
         }
-        //镜像处理文章中的图片，并自动处理大小和格式
+        //镜像处理文章中的图片，并自动处理大小和格式，todo 如果使用了vditor 这无法解析
         if ($options->cdn_add != "") {
             $cdnArray = explode("|", $options->cdn_add);
             $localUrl = str_replace("/", "\/", $options->rootUrl);//本地加速域名
@@ -1907,12 +2193,24 @@ EOF;
             if ($isImagePost) {
                 $width = 300;//图片的缩略图大小
             }
-            $suffix = Utils::getImageAddOn($options, true, trim($cdnArray[1]), $width, 0,"post");//图片云处理后缀
-            $content = preg_replace_callback('/(<img\s[^>]*?src=")' . $localUrl . '([^>]*?)"([^>]*?>)/',function
-            ($matches) use ($cdnUrl,$suffix){
-                return $matches[1]. $cdnUrl
-                    . $matches[2] . $suffix."\"" . $matches[3];
-            }, $content);
+            $suffix = Utils::getImageAddOn($options, true, trim($cdnArray[1]), $width, 0, "post");//图片云处理后缀
+            $content = preg_replace_callback('/(<img\s[^>]*?src=")' . $localUrl . '([^>]*?)"([^>]*?)alt="([^>]*?)"([^>]*?>)/',
+                function ($matches) use ($cdnUrl, $suffix) {
+                    $alt = $matches[4];
+                    //判断是否需要加云处理后缀的
+                    if (strpos($matches[4], " ':ignore'") !== false) {
+                        //alt文本去掉信息元素
+                        $alt = str_replace(" ':ignore'", "", $alt);
+                        return $matches[1] . $cdnUrl
+                            . $matches[2] . "\"" . $matches[3] . 'alt="' . $alt . '"' . $matches[5];
+                    } else {
+                        return $matches[1] . $cdnUrl
+                            . $matches[2] . $suffix . "\"" . $matches[3] . 'alt="' . $alt . '"' . $matches[5];
+                    }
+                    //todo 判断参数决定显示的图片大小
+
+
+                }, $content);
         }
 
         //延迟加载
@@ -1969,62 +2267,70 @@ EOF;
     }
 
 
-    public static function parseContentUrl($matches){
+    public static function parseContentUrl($matches)
+    {
 
     }
-    public static  function parseContentFitImage($matches){
+
+    public static function parseContentFitImage($matches)
+    {
         print_r($matches);
     }
 
     /**
      * 解析文章内容为图片列表（相册）
      * @param $content
+     * @param $type
      * @return string
      */
-    public static function parseContentToImage($content,$type)
+    public static function parseContentToImage($content, $type)
     {
         preg_match_all('/<img.*?src="(.*?)"(.*?)(alt="(.*?)")??(.*?)\/?>/', $content, $matches);
-        $html = "";
-        if ($type === "photos"){//自适应拉伸的
-            $html .= "<div class='album-photos'>";
-        }else{//统一宽度排列
-            $html .= "<div class='photos'>";
-        }
-        if (is_array($matches)) {
-//            print_r($matches);
-            if (count($matches[0]) == 0) {
-                $html .= '<small class="text-muted letterspacing indexWords">相册无图片</small>';
-            } else {
-                for ($i = 0; $i < count($matches[0]); $i++) {
-                    $info = trim($matches[5][$i]);
-                    preg_match('/alt="(.*?)"/', $info, $info);
-                    if (is_array($info) && count($info) >= 2) {
+
+        if (is_array($matches) && count($matches[0]) > 0) {
+
+            $html = "";
+            if ($type === "photos") {//自适应拉伸的
+                $html .= "<div class='album-photos'>";
+            } else {//统一宽度排列
+                $html .= "<div class='photos'>";
+            }
+            for ($i = 0; $i < count($matches[0]); $i++) {
+                $info = trim($matches[5][$i]);
+                preg_match('/alt="(.*?)"/', $info, $info);
+                if (is_array($info) && count($info) >= 2) {
 //                        print_r($info);
-                        $info = @$info[1];
-                    } else {
-                        $info = "";
-                    }
-                    if ($type == "photos"){
-                        $html .= <<<EOF
+                    $info = @$info[1];
+                } else {
+                    $info = "";
+                }
+                if ($type == "photos") {
+                    $html .= <<<EOF
 <figure>
         {$matches[0][$i]}
         <figcaption>{$info}</figcaption>
-    </figure>
+</figure>
 EOF;
-                    }else{
-                        $html .= <<<EOF
+                } else {
+                    $html .= <<<EOF
 <figure class="image-thumb" itemprop="associatedMedia" itemscope="" itemtype="http://schema.org/ImageObject">
           {$matches[0][$i]}
           <figcaption itemprop="caption description">{$info}</figcaption>
       </figure>
 EOF;
-                    }
                 }
             }
-        }
-        $html .= "</div>";
 
-        return $html;
+            $html .= "</div>";
+
+            return $html;
+        } else {
+            //解析失败，就不解析，交给前端进行解析，还原之前的短代码
+            $type = ($type == "photos") ? ' type="photos"' : "";
+            return "<div class='album_block'>\n\n[album" . $type . "]\n" . $content . "[/album] </div>";
+        }
+
+
     }
 
 
@@ -2038,7 +2344,7 @@ EOF;
         if ($obj->hidden === true) {//输入密码访问
             return $content;
         } else {
-            return Content::parseContentToImage($content,"album");
+            return Content::parseContentToImage($content, "album");
         }
     }
 
@@ -2135,9 +2441,9 @@ EOF;
     /**
      * Retrieve the shortcode attributes regex.
      *
+     * @return string The shortcode attribute regular expression
      * @since 4.4.0
      *
-     * @return string The shortcode attribute regular expression
      */
     public static function get_shortcode_atts_regex()
     {
@@ -2155,7 +2461,7 @@ EOF;
      * @param Widget_Archive $archive
      * @param $security
      */
-    public static function outputCommentJS(Widget_Archive $archive, $security)
+    public static function outputCommentJS($archive, $security)
     {
 
         $options = mget();
@@ -2310,11 +2616,19 @@ var registCommentEvent = function() {
             "commentReply",
         );
 
-        if ($archive->is('category')){//是分类
+        if ($archive->is('category')) {//是分类
             $content = $archive->getDescription();
-            $content = json_decode($content,true);
-            if (is_array($content) && @$content['lock'] == true){
+            $content = json_decode($content, true);
+            if (is_array($content) && @$content['lock'] == true) {
                 $rules[] = "description";
+            }
+        } else {
+            //如果文章是分类加密的文章也不显示description
+            $content = @$archive->stack[0]['categories'][0]['description'];
+            $content = json_decode($content, true);
+            if (is_array($content) && @$content['lock'] == true) {
+                $rules[] = "description";
+                $rules[] = "keywords";
             }
         }
 
@@ -2875,6 +3189,53 @@ EOF;
     }
 
 
+    public static function returnLeftItem($asideItem, $haveSub, $subListHtml)
+    {
+
+        $ret = "";
+        @$itemName = $asideItem->name;
+        @$itemStatus = $asideItem->status;
+        @$itemLink = $asideItem->link;
+        @$itemClass = $asideItem->class;
+        @$itemFeather = $asideItem->feather;
+        @$itemSub = $asideItem->sub;
+        @$itemTarget = $asideItem->target;
+
+
+        if (@$itemTarget) {
+            $linkStatus = 'target="' . $itemTarget . '"';
+        } else {
+            $linkStatus = 'target="_self"';
+        }
+        if (trim($itemFeather) == "") {
+            if (count(mb_split(" ", $itemClass)) == 1 && strpos($itemClass,"fontello") === false && strpos($itemClass,"glyphicon") === false) {
+                $itemFeather = $itemClass;
+            }
+        }
+
+        $right_arrow = ($haveSub) ? '<span class="pull-right text-muted">
+                    <i class="fontello icon-fw fontello-angle-right text"></i>
+                    <i class="fontello icon-fw fontello-angle-down text-active"></i>
+                  </span>' : "";
+
+        if (trim($itemFeather) !== "") {
+            $ret = '<li> <a ' . $linkStatus . ' href="' . $itemLink . '" 
+class ="auto">' . $right_arrow . '<span class="nav-icon"><i data-feather="' . $itemFeather . '"></i></span><span>' . _mt
+                ($itemName) . '</span></a>' . $subListHtml . '</li>';
+        } else if (trim($itemClass) !== "") {
+            $ret = '<li> <a ' . $linkStatus . ' href="' . $itemLink . '" class ="auto">' . $right_arrow . '<span class="nav-icon"><i class="'
+                . $itemClass . '"></i></span><span>' . _mt($itemName) . '</span></a>' . $subListHtml . '</li>';
+        }
+
+        return $ret;
+    }
+
+
+    public static function returnLeftItems()
+    {
+
+    }
+
     /**
      * @param $categories
      * @return string
@@ -2953,7 +3314,7 @@ EOF;
                             <p class="infinite-scroll-request"><i class="glyphicon 
                             glyphicon-refresh"></i>加载失败！尝试重新加载</p>
                         </nav>
-                        <div class="streamline b-l b-info m-l-lg m-b padder-v hide">
+                        <div class="streamline b-l m-l-lg m-b padder-v hide">
                             <ol class="comment-list">
                             </ol>
                         </div>
@@ -2973,9 +3334,9 @@ EOF;
 
     public static function returnWheelHtml($content)
     {
-        $json = "[" . $content. "]";
+        $json = "[" . $content . "]";
         $wheelItems = json_decode($json);
-        $wheelItemsOutput = "\n".'<div id="index-carousel" class="box-shadow-wrap-normal border-radius-6 carousel slide m-b-md" data-ride="carousel">';
+        $wheelItemsOutput = "\n" . '<div id="index-carousel" class="box-shadow-wrap-normal border-radius-6 carousel slide m-b-md" data-ride="carousel">';
 
         $carouselIndicators = <<<EOF
                 <ol class="carousel-indicators">
@@ -2991,10 +3352,10 @@ EOF;
             @$itemDesc = $item->desc;
             @$itemLink = $item->link;
             $itemCover = $item->cover;
-            
+
 
             $insert = "";
-            if ($index === 0){
+            if ($index === 0) {
                 $insert = 'active';
             }
             $carouselIndicators .= <<<EOF
@@ -3003,40 +3364,222 @@ EOF;
 
             $carouselInner .= <<<EOF
 <div class="item $insert border-radius-6">
-
-                        <img class="index-image border-radius-6" src="$itemCover" data-holder-rendered="true">
+<a href="$itemLink">
+                        <img class="border-radius-6" src="$itemCover" data-holder-rendered="true">
                         <div class="carousel-caption">
-                           <a href="$itemLink"><h3>$itemTitle</h3></a>
+                           <h3>$itemTitle</h3>
                             <p>$itemDesc</p>
                         </div>
-                        
+                        </a>
                     </div>
 EOF;
 
-            $index ++;
+            $index++;
 
         }
 
-        $carouselIndicators.="</ol>";
+        $carouselIndicators .= "</ol>";
         $carouselInner .= "</div>";
 
         $carouselControl = <<<EOF
 <a class="left carousel-control" href="#index-carousel" role="button" data-slide="prev">
-                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                    <svg class="glyphicon-chevron-left" viewBox="0 0 24 24" width="24" height="24" 
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     <span class="sr-only">Previous</span>
                 </a>
 <a class="right carousel-control" href="#index-carousel" role="button" data-slide="next">
-                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="glyphicon-chevron-right" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     <span class="sr-only">Next</span>
                 </a>
 EOF;
 
-        $wheelItemsOutput .=$carouselIndicators."\n".$carouselInner."\n".$carouselControl;
+        $wheelItemsOutput .= $carouselIndicators . "\n" . $carouselInner . "\n" . $carouselControl;
 
 
         $wheelItemsOutput .= "</div>";
 
         return $wheelItemsOutput;
+
+    }
+
+
+    /**
+     * @param $type post-calendar category-radar posts-chart categories-chart tags-chart
+     */
+    public static function statisticPane($type)
+    {
+
+
+    }
+
+
+    /**
+     * @param $type post-calendar category-radar posts-chart categories-chart tags-chart
+     * @param $obj
+     * @param $monthNum
+     * @return array
+     */
+    public static function getStatisticContent($type, $obj,$monthNum=10)
+    {
+
+        $object = array();
+
+        if ($type == "post-calendar" || $type == "posts-chart") {
+            //获取统计信息
+            $filePath = __TYPECHO_ROOT_DIR__ . __TYPECHO_PLUGIN_DIR__ . DIRECTORY_SEPARATOR . 'Handsome' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'search.json';
+            $fileContent = file_get_contents($filePath);
+
+
+            //1. 确定时间段
+            //获取今天所在的月份
+            $end_m = (int)date('m');
+            $end_d = (int)date('d');
+            $end_y = (int)date('Y');
+
+            $start_y = $end_y;
+
+            if ($type == "post-calendar") {
+                $start_m = $end_m - $monthNum + 1;
+            } else {//post-chart 只需要近5个月的数据
+                $start_m = $end_m - 5;
+            }
+            $start_d = $end_d;
+            if ($start_m < 0) {
+                $start_m = $start_m + 12;
+                $start_y = $start_y - 1;
+            }
+            //获取该时间段的每一天的日期，及其该日的文章数目。
+
+            $start_timestamp = strtotime($start_y . "-" . $start_m . "-" . $start_d);
+            $end_timestamp = strtotime($end_y . "-" . $end_m . "-" . $end_d);
+
+            $data = array();
+            $max_single = 0;// 最大每日/月的文章数目
+
+            if ($type == "post-calendar") {
+
+                $commentPath = __TYPECHO_ROOT_DIR__ . __TYPECHO_PLUGIN_DIR__ . DIRECTORY_SEPARATOR . 'Handsome'
+                    . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'comment.json';
+                $commentContent = file_get_contents($commentPath);
+
+
+                // 计算日期段内有多少天
+                $date = array();// 保存每天日期
+                while ($start_timestamp <= $end_timestamp) {
+                    $temp = date('Y-m-d', $start_timestamp);
+                    $date[] = $temp;
+                    //搜索当日发表的文章数目
+                    $temp_num = substr_count($fileContent, '"date":"' . $temp);
+                    $temp_comment_num = substr_count($commentContent, $temp);
+                    $temp_num = $temp_comment_num + $temp_num;
+
+                    if ($temp_num > $max_single) {
+                        $max_single = $temp_num;
+                    }
+                    if ($max_single > 3) {//max 最大值是3，再后面是4+
+                        $max_single = 4;
+                    }
+                    if ($temp_num > 3) {
+//                        $temp_num = 4;
+                    }
+
+                    $data[] = array(
+                        $temp,
+                        $temp_num
+                    );
+                    $start_timestamp = strtotime('+1 day', $start_timestamp);
+                }
+
+                $object['series'] = $data;
+                $object['range'] = array(
+                    $start_y . "-" . $start_m . "-" . $start_d,
+                    $end_y . "-" . $end_m . "-" . $end_d
+                );
+                $object['categories'] = range(0, $max_single);
+                $object['max'] = $max_single;
+//                $object['num_range'] = range(0,$max_single);
+//                if (count($object['categories']) ==5){
+//                    $object['categories'][4] = 'N';
+//                }
+
+
+            } else {
+                // 计算时间段内有多少个月
+                $xAxis = [];
+                while ($start_timestamp <= $end_timestamp) {
+                    $temp = date('Y-m', $start_timestamp); // 取得递增月;
+                    $temp_num = substr_count($fileContent, '"date":"' . $temp);
+                    if ($temp_num > $max_single) {
+                        $max_single = $temp_num;
+                    }
+                    $xAxis[] = $temp;
+                    $data[] = $temp_num;
+                    $start_timestamp = strtotime('+1 month', $start_timestamp);
+                }
+
+                $object['series'] = $data;
+                $object["xAxis"] = $xAxis;
+                $object['categories'] = range(0, $max_single);
+            }
+        }
+
+        if ($type == "category-radar" || $type == "categories-chart" || $type == "tags-chart") {
+            $object = [];
+            $name = [];
+            $indicator = [];
+            $num = [];
+            $i = -1;
+            while ($obj->next()) {
+//                print_r("\n\n================i:".$i."================\n\n");
+                //判断是否是子分类
+                if ($obj->levels == 0) {
+                    $i ++;
+//                    print_r("\nmid".$obj->mid."|count:".$obj->count."\n");
+                    $name[] = $obj->name;
+                    $num [] = $obj->count;
+                }else{
+                    $num [$i] += $obj->count;
+//                    print_r("level:".$obj->levels."|id".$obj->mid."parent:".$obj->parent."|");
+                }
+            }
+
+            $max_single = max($num);
+
+//            print_r("count:".$i);
+
+            for ($i = 0; $i < count($num); $i++) {
+                if ($type == "category-radar") {
+                    $indicator[] = (object)array(
+                        "name" => $name[$i],
+                        "max" => $max_single
+                    );
+                } else if ($type == "categories-chart") {
+                    $indicator[] = (object)array(
+                        "name" => $name[$i],
+                        "value" => $num[$i]
+                    );
+                } else if ($type == "tags-chart") {
+                    $indicator[] = $name[$i];
+                }
+            }
+
+            if ($type == "categories-chart") {
+                //保证color数组的颜色不重复
+                $color = ['#6772e5', '#ff9e0f', '#fa755a', '#3ecf8e', '#82d3f4', '#ab47bc', '#525f7f', '#f51c47', '#26A69A', '#6772e5', '#ff9e0f', '#fa755a', '#3ecf8e', '#82d3f4', '#ab47bc', '#525f7f', '#f51c47', '#26A69A'];
+                $cColor = [];
+                for ($i = 0; $i < count($num); $i++) {
+                    $cColor [] = $color[$i % count($color)];
+                }
+
+                $object["color"] = $cColor;
+            }
+
+            $object["indicator"] = $indicator;
+            $object["series"] = $num;
+
+        }
+        return $object;
 
     }
 }

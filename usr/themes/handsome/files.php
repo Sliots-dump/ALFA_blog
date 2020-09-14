@@ -17,7 +17,7 @@ $stat = Typecho_Widget::widget('Widget_Stat');
 
 <!-- <div id="content" class="app-content"> -->
 <a class="off-screen-toggle hide"></a>
-<main class="app-content-body <?php echo Content::returnPageAnimateClass($this); ?>">
+<main class="app-content-body <?php Content::returnPageAnimateClass($this); ?>">
     <div class="hbox hbox-auto-xs hbox-auto-sm">
         <div class="col center-part">
             <header class="bg-light lter wrapper-md">

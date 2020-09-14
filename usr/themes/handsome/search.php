@@ -30,29 +30,32 @@ $this->need('component/header.php');
                         <div class="tab-pane active" id="tab_1">
                             <ul class="list-group no-borders pull-in m-b-none">
                                 <?php
-                                if ($this->have()): ?>
-                                <?php while ($this->next()): ?>
+                                //从自己的接口中获取搜索内容
+                                $array = searchGetResult($this->request->keywords,100);
+//                                print_r($array);
+                                if (!empty($array)): ?>
+                                <?php foreach ($array as $item): ?>
                                 <li class="list-group-item">
-                                    <a href="<?php $this->permalink(); ?>" class="text-ellipsis h5 block"><?php
-                                        $this->title(); ?></a>
-                                    <p class="summary l-h-2x text-muted"><?php echo Content::excerpt($this->content,100); ?></p>
+                                    <a href="<?php echo $item["path"]; ?>" class="text-ellipsis h5 block"><?php
+                                        echo $item["title"]; ?></a>
+                                    <p class="summary l-h-2x text-muted"><?php echo  $item["content"]; ?></p>
                                 </li>
-                                    <?php endwhile; ?>
+                                    <?php endforeach; ?>
                                 <?php else: ?>
                                     <p class="m-t-md no_search_result"> <?php _me("没有找到搜索结果，请尝试更换关键词。") ?> </p>
                                 <?php endif; ?>
                             </ul>
 
                             <!--分页 按钮-->
-                            <nav class="text-center " role="navigation">
-                                <?php $this->pageNav('<i class="fontello fontello-chevron-left"></i>', '<i class="fontello fontello-chevron-right"></i>'); ?>
-                            </nav>
-                            <style>
-                                .page-navigator>li>a, .page-navigator>li>span{
-                                    line-height: 1.42857143;
-                                    padding: 6px 12px;
-                                }
-                            </style>
+<!--                            <nav class="text-center " role="navigation">-->
+<!--                                --><?php //$this->pageNav('<i class="fontello fontello-chevron-left"></i>', '<i class="fontello fontello-chevron-right"></i>'); ?>
+<!--                            </nav>-->
+<!--                            <style>-->
+<!--                                .page-navigator>li>a, .page-navigator>li>span{-->
+<!--                                    line-height: 1.42857143;-->
+<!--                                    padding: 6px 12px;-->
+<!--                                }-->
+<!--                            </style>-->
                         </div>
 
                     </div>

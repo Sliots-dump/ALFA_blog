@@ -28,11 +28,10 @@
         <!--文章页面的头图-->
             <?php echo Content::exportHeaderImg($this); ?>
          <!--文章内容-->
-         <div class="wrapper-lg">
+         <div class="wrapper-lg" id="post-content">
           <?php getFriendWall(); ?>
-          <div class="entry-content l-h-2x">
-              <?php echo Content::postContent($this,$this->user->hasLogin()); ?>
-          </div>
+          <?php Content::postContentHtml($this,
+              $this->user->hasLogin()); ?>
              <?php Content::pageFooter($this->options) ?>
          </div>
         </article>

@@ -125,7 +125,7 @@
           <section id="tag_cloud-2" class="widget widget_tag_cloud wrapper-md clear">
               <h5 class="widget-title m-t-none text-md"><?php _me("标签云") ?></h5>
               <div class="post-tags tags l-h-2x">
-                  <?php $this->tags(' ', true, '暂无标签'); ?>
+                  <?php $this->tags(' ', true, _mt("暂无标签")); ?>
               </div>
           </section>
           <?php if (IS_TOC): ?>
@@ -140,14 +140,16 @@
               <div class="hidden-lg tocify-mobile-panel panel panel-default
               setting_body_panel"
                    aria-hidden="true">
-                  <button class="border-radius-half-left btn btn-default no-shadow pos-abt " data-toggle="tooltip" data-placement="left"
+                  <button class="fix-padding border-radius-half-left btn btn-default no-shadow pos-abt "
+                          data-toggle="tooltip"
+                          data-placement="left"
                           data-original-title="<?php _me("目录") ?>" data-toggle-class=".tocify-mobile-panel=active">
                       <i class="glyphicon glyphicon-resize-full"></i>
                   </button>
                   <div class="panel-heading"><?php _me("文章目录") ?></div>
                   <div class="setting_body toc-mobile-body">
                       <div class="panel-body">
-                          <div class="tocTree"></div>
+                          <div id="tocTree" class="tocTree"></div>
                       </div>
                   </div>
               </div>

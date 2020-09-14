@@ -55,8 +55,6 @@ class Lang_en extends Lang {
             '随机文章' => 'Random articles',
             '评论详情' => 'Comment details',
             '详情' => 'details',
-            '随机文章' => 'Random articles',
-            '分类' => 'Categories',
             '标签云' => 'Tag cloud',
             '文章目录' => 'Article Directory',
             '设置' => 'Setting',
@@ -67,7 +65,26 @@ class Lang_en extends Lang {
             '置顶导航' => 'Top navigation',
             '盒子模型' => 'Box model',
             '恢复默认值' => 'Restore Defaults',
-
+            '博客信息' => 'Blog Info',
+            "暂无标签" => 'no tag',
+            "管理" => 'Admin',
+            "文章" => 'Post',
+            '新建文章' => 'New Post',
+            '评论管理' => 'Comments Manage',
+            '动态日历' => 'Activity Calendar',
+            '分类雷达图' => 'Radar Chart',
+            '发布统计图' => 'Release Chart',
+            '分类统计图' => 'Classification Chart',
+            '标签统计图' => 'Tag Chart',
+            '统计近10个月的文章和作者评论数目' => 'Count the number of articles and author reviews over the last 10 months',
+            '外观设置' => 'Preference',
+            '深色模式' => 'Dark Mode',
+            '深色模式（固定）' => 'Dark Mode(Fixed)',
+            '深色模式（自动）' => 'Dark Mode(Auto)',
+            '文章数目' => 'Posts Num',
+            '评论数目' => 'Comments Num',
+            '运行天数' => 'Operating Days',
+            '最后活动' => 'Last activity',
 
 
             /*评论 Comments*/
@@ -134,6 +151,8 @@ class Lang_en extends Lang {
             '1 秒前'   => '1 Second Ago',
             '昨天 %s'   => 'Yesterday %s',
             '刚刚' => 'Just now',
+            '%d年%d天' =>'%d Y %d D',
+            '%d天' =>'%d D',
 
             /*文章页面 post/page.php */
             '如果觉得我的文章对你有用，请随意赞赏' => 'If you think my article is useful to you, please feel free to appreciate',
@@ -162,6 +181,9 @@ class Lang_en extends Lang {
             '返回首页' => 'Return to Home',
             '没有找到搜索结果，请尝试更换关键词。' => 'Can not find the search results, please try to replace the keyword.',
             '正文' => "Text",
+            "字数" => ' words',
+            "居然什么也不说，哼" => 'just say something...',
+            '私密' => 'Private',
 
             /*登录退出提交 */
             '必须填写用户名' => 'Must fill in the user name',
@@ -182,7 +204,6 @@ class Lang_en extends Lang {
 
             /*其他*/
             '返回顶部' => 'Top',
-            '作者' => 'Author',
             '用户' => 'User',
 
             /*独立页面*/

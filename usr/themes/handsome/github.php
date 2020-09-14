@@ -35,7 +35,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
          <!--文章内容-->
          <div id="post-content" class="wrapper-lg">
           <div class="l-h-2x row">
-              <?php echo Content::postContent($this,$this->user->hasLogin()); ?>
+              <?php Content::postContentHtml($this,$this->user->hasLogin()); ?>
               <small class="text-muted letterspacing github_tips"></small>
               <!--github--->
               <div class="github_page">

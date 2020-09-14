@@ -86,28 +86,30 @@
                   $asideItems = json_decode($json);
                   $asideItemsOutput = "";
                   foreach ($asideItems as $asideItem){
+
                       @$itemName = $asideItem->name;
                       @$itemStatus = $asideItem->status;
-                      @$itemLink = $asideItem->link;
-                      @$itemClass = $asideItem->class;
-                      @$itemFeather = $asideItem->feather;
 
-                      @$itemTarget = $asideItem->target;
+                      @$itemSub = $asideItem->sub;
+
                       if ($itemName === 'home' && strtoupper($itemStatus) === 'HIDE'){
                           $hideHomeItem = true;
                           continue;//本次循环结束，不再执行下面内容
                       }
-                      if (@$itemTarget){
-                          $linkStatus = 'target="'.$itemTarget.'"';
-                      }else{
-                          $linkStatus = 'target="_blank"';
+
+                      $haveSub = false;
+                      $subListHtml = "";
+//                      print_r($itemSub);
+                      if (is_array($itemSub)){
+                          $haveSub = true;
+                          $subListHtml .= '<ul class="nav nav-sub dk">';
+                          foreach ($itemSub as $subItem){
+                              $subListHtml .= Content::returnLeftItem($subItem,false,"");
+                          }
+                          $subListHtml .= '</ul>';
                       }
-                      if (trim($itemFeather)!==""){
-                          $asideItemsOutput .= '<li> <a '.$linkStatus.' href="'.$itemLink.'" 
-class ="auto"><span class="nav-icon"><i data-feather="'.$itemFeather.'"></i></span><span>'._mt($itemName).'</span></a></li>';
-                      }else if (trim($itemClass)!==""){
-                          $asideItemsOutput .= '<li> <a '.$linkStatus.' href="'.$itemLink.'" class ="auto"><span class="nav-icon"><i class="'.$itemClass.'"></i></span><span>'._mt($itemName).'</span></a></li>';
-                      }
+
+                      $asideItemsOutput .= Content::returnLeftItem($asideItem,$haveSub,$subListHtml);
                   }
               }
               ?>
@@ -135,7 +137,7 @@ class ="auto"><span class="nav-icon"><i data-feather="'.$itemFeather.'"></i></sp
                         $class = "class=\"active\"";
                     }
                     ?>
-              <li class="active">
+              <li <?php echo $class; ?>>
                 <a class="auto">
                   <span class="pull-right text-muted">
                     <i class="fontello icon-fw fontello-angle-right text"></i>
@@ -153,9 +155,15 @@ class ="auto"><span class="nav-icon"><i data-feather="'.$itemFeather.'"></i></sp
                     </a>
                   </li>
                   <!--循环输出分类-->
+
+                    <?php $this->widget('Handsome_Widget_Metas_Category_List')->listCategories('wrapClass=nav nav-sub dk&childClass=child-nav'); ?>
                     <?php
                     $this->widget('Widget_Metas_Category_List')->to($categorys);
-                    echo Content::returnCategories($categorys) ?>
+//                    echo Content::returnCategories($categorys)
+                    ?>
+
+                    <!--/循环输出分类-->
+
                 </ul>
               </li>
               <!--独立页面pages-->
@@ -200,7 +208,7 @@ class ="auto"><span class="nav-icon"><i data-feather="'.$itemFeather.'"></i></sp
                   </li>
                   <!--使用links插件，输出全站友链-->
                  <?php $mypattern1 = "<li data-original-title=\"{title}\" data-toggle=\"tooltip\" 
-data-placement=\"top\"><a href=\"{url}\" target=\"_blank\"><span>{name}</span></a></li>";
+data-placement=\"top\"><a rel='noopener' href=\"{url}\" target=\"_blank\"><span>{name}</span></a></li>";
                   Handsome_Plugin::output($mypattern1, 0, "ten");?>
                 </ul>
               </li>
@@ -248,3 +256,9 @@ data-placement=\"top\"><a href=\"{url}\" target=\"_blank\"><span>{name}</span></
 <div id="content" class="app-content">
     <!--loading animate-->
     <?php echo Content::returnPjaxAnimateHtml(); ?>
+
+
+
+
+
+
