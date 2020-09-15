@@ -475,57 +475,5 @@
     "作品\/日历\/2005": {
         "url": "作品\/日历\/2005",
         "index": 1
-    },
-    "resource": {
-        "url": "resource",
-        "hidden": true
-    },
-    "resource\/RPG": {
-        "url": "resource\/RPG"
-    },
-    "resource\/ALFA祭": {
-        "url": "resource\/ALFA祭"
-    },
-    "resource\/ALFA祭\/摊位板": {
-        "url": "resource\/ALFA祭\/摊位板"
-    },
-    "resource\/ALFA祭\/网站横幅": {
-        "url": "resource\/ALFA祭\/网站横幅"
-    },
-    "resource\/看板娘": {
-        "url": "resource\/看板娘"
-    },
-    "resource\/ALFA祭\/摊位图": {
-        "url": "resource\/ALFA祭\/摊位图"
-    },
-    "resource\/ALFA祭\/幕布": {
-        "url": "resource\/ALFA祭\/幕布"
-    },
-    "resource\/ALFA祭\/工作证": {
-        "url": "resource\/ALFA祭\/工作证"
-    },
-    "resource\/ALFA祭\/场刊": {
-        "url": "resource\/ALFA祭\/场刊"
-    },
-    "resource\/ALFA祭\/传单": {
-        "url": "resource\/ALFA祭\/传单"
-    },
-    "resource\/ALFA祭\/舞台节目表": {
-        "url": "resource\/ALFA祭\/舞台节目表"
-    },
-    "resource\/ALFA祭\/LOGO": {
-        "url": "resource\/ALFA祭\/LOGO"
-    },
-    "resource\/LOGO二维码": {
-        "url": "resource\/LOGO二维码"
-    },
-    "resource\/看板娘\/立绘": {
-        "url": "resource\/看板娘\/立绘"
-    },
-    "resource\/招新嘉年华": {
-        "url": "resource\/招新嘉年华"
-    },
-    "resource\/招新嘉年华\/传单": {
-        "url": "resource\/招新嘉年华\/传单"
     }
 }
